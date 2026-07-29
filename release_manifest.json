@@ -1,0 +1,83 @@
+{
+  "name": "VoxPilot Chairman iPhone GitHub Edition",
+  "version": "4.0.0",
+  "verification": "PASS",
+  "generated_at": "2026-07-28T21:50:10.568450",
+  "files": [
+    {
+      "path": ".github/workflows/deploy-pages.yml",
+      "sha256": "24914d8300b7a5abeb4aacee014e467a306efd702a1faddaf158d69923e5a503",
+      "bytes": 675
+    },
+    {
+      "path": ".nojekyll",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "INTEGRATION_ARCHITECTURE.md",
+      "sha256": "e9f70d3f9e153af261fd8b4b0b8805216494a6373135c6f8b97fab6738b66a7f",
+      "bytes": 2158
+    },
+    {
+      "path": "IPHONE_DEPLOYMENT.md",
+      "sha256": "0aa1ae6aadef7231a178d4ba5d16af3ae8b423b594249db66b2270e831e2c7da",
+      "bytes": 1081
+    },
+    {
+      "path": "IPHONE_SETUP.md",
+      "sha256": "84e7d3b571e33b222c80beed79f1f28706f858c067760adfc0e97abea343bf38",
+      "bytes": 803
+    },
+    {
+      "path": "README.md",
+      "sha256": "b684a986fe07d4165c35233196711ecfb1e96b6ffae432e461cd047a42ce8c37",
+      "bytes": 2690
+    },
+    {
+      "path": "VERIFICATION_REPORT.json",
+      "sha256": "2ecc61d0b07e6609a925b1035349f36aba7c9d1dc0f5214d81925eba0063bcdc",
+      "bytes": 423
+    },
+    {
+      "path": "app.js",
+      "sha256": "319fbbf7c7fad961300fa39b7c8cafed8b56f0949befebb0175c2400ad61a4e7",
+      "bytes": 41542
+    },
+    {
+      "path": "connector-catalog.json",
+      "sha256": "7e0f3ec92fceaa984707052d3dd5e39f62f1c184c8a26c0867a3ab077d8035ad",
+      "bytes": 21869
+    },
+    {
+      "path": "icons/icon-192.svg",
+      "sha256": "fe37feb716fa603d09c4062bc35beb9f73b6f501e5e79954c4e1db3c6a3fee03",
+      "bytes": 366
+    },
+    {
+      "path": "icons/icon-512.svg",
+      "sha256": "b64eec5db105f31d501ecf0fd02f229f706f69281ef62202c39587a1f6219eea",
+      "bytes": 366
+    },
+    {
+      "path": "index.html",
+      "sha256": "2655f5356f03c9cfc1865c17e74c945516509e6a8c18d6ff93e2ab7e8b8c38e3",
+      "bytes": 7813
+    },
+    {
+      "path": "manifest.webmanifest",
+      "sha256": "4bc96e822a400817efb7ca485f53d072b0219c84079f696539aa4771ad3d7872",
+      "bytes": 642
+    },
+    {
+      "path": "service-worker.js",
+      "sha256": "a7030d378caadc43cff94fcd86dfb6db72daab88d31ada9ebbb96682445d36fa",
+      "bytes": 762
+    },
+    {
+      "path": "styles.css",
+      "sha256": "d40cc4aa89aebcbb5f96a391be0eb0996e1fe67f86cb0e0d9db3911cdfeb72dc",
+      "bytes": 4819
+    }
+  ]
+}

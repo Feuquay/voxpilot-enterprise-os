@@ -1,0 +1,1051 @@
+{
+  "version": "1.0",
+  "connectors": [
+    {
+      "id": "autodesk",
+      "brand": "Autodesk Platform Services",
+      "category": "CAD / BIM / Manufacturing",
+      "products": [
+        "AutoCAD",
+        "Revit",
+        "Fusion",
+        "Inventor",
+        "3ds Max",
+        "Forma",
+        "Construction Cloud"
+      ],
+      "capabilities": [
+        "Data Management",
+        "Model Derivative",
+        "Automation",
+        "Viewer",
+        "Reality Capture",
+        "Parameters"
+      ],
+      "formats": [
+        "DWG",
+        "DXF",
+        "RVT",
+        "IFC",
+        "STEP",
+        "IGES",
+        "STL",
+        "OBJ",
+        "FBX",
+        "SVF2",
+        "PDF"
+      ],
+      "auth": "OAuth 2.0 / service credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "bentley",
+      "brand": "Bentley Systems",
+      "category": "Infrastructure / Digital Twin",
+      "products": [
+        "MicroStation",
+        "iTwin",
+        "OpenRoads",
+        "OpenBuildings",
+        "ProjectWise"
+      ],
+      "capabilities": [
+        "Infrastructure models",
+        "Digital twins",
+        "Project data",
+        "Reality modeling"
+      ],
+      "formats": [
+        "DGN",
+        "IFC",
+        "LandXML",
+        "LAS",
+        "OBJ",
+        "iModel"
+      ],
+      "auth": "OAuth / platform credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "dassault",
+      "brand": "Dassault Syst\u00e8mes 3DEXPERIENCE",
+      "category": "PLM / CAD / Simulation",
+      "products": [
+        "SOLIDWORKS",
+        "CATIA",
+        "SIMULIA",
+        "DELMIA",
+        "ENOVIA"
+      ],
+      "capabilities": [
+        "CAD",
+        "PLM",
+        "Simulation",
+        "Manufacturing planning",
+        "Lifecycle governance"
+      ],
+      "formats": [
+        "STEP",
+        "IGES",
+        "STL",
+        "3DXML",
+        "SLDPRT",
+        "CATPart"
+      ],
+      "auth": "OAuth / enterprise tenant",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "siemens",
+      "brand": "Siemens Xcelerator",
+      "category": "PLM / CAD / Simulation",
+      "products": [
+        "NX",
+        "Teamcenter",
+        "Simcenter",
+        "Solid Edge",
+        "Tecnomatix"
+      ],
+      "capabilities": [
+        "CAD/CAM",
+        "PLM",
+        "CAE",
+        "Digital manufacturing",
+        "Digital twin"
+      ],
+      "formats": [
+        "JT",
+        "STEP",
+        "IGES",
+        "Parasolid",
+        "STL",
+        "CSV"
+      ],
+      "auth": "Enterprise API credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "ptc",
+      "brand": "PTC",
+      "category": "PLM / CAD / IoT",
+      "products": [
+        "Creo",
+        "Windchill",
+        "ThingWorx",
+        "Vuforia"
+      ],
+      "capabilities": [
+        "Product design",
+        "PLM",
+        "Industrial IoT",
+        "AR work instructions"
+      ],
+      "formats": [
+        "STEP",
+        "IGES",
+        "STL",
+        "Creo",
+        "JT",
+        "CSV"
+      ],
+      "auth": "OAuth / enterprise credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "ansys",
+      "brand": "Ansys",
+      "category": "Engineering Simulation",
+      "products": [
+        "Mechanical",
+        "Fluent",
+        "HFSS",
+        "LS-DYNA",
+        "Digital Twin"
+      ],
+      "capabilities": [
+        "FEA",
+        "CFD",
+        "Electromagnetics",
+        "Explicit dynamics",
+        "Reduced-order models"
+      ],
+      "formats": [
+        "STEP",
+        "IGES",
+        "Parasolid",
+        "STL",
+        "CSV",
+        "HDF5"
+      ],
+      "auth": "Enterprise API / PyAnsys service",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "altair",
+      "brand": "Altair",
+      "category": "Engineering Simulation / Analytics",
+      "products": [
+        "HyperWorks",
+        "SimSolid",
+        "Inspire",
+        "RapidMiner"
+      ],
+      "capabilities": [
+        "CAE",
+        "Optimization",
+        "Generative design",
+        "Data analytics"
+      ],
+      "formats": [
+        "STEP",
+        "IGES",
+        "STL",
+        "CSV",
+        "H3D"
+      ],
+      "auth": "Enterprise credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "mathworks",
+      "brand": "MathWorks",
+      "category": "Modeling / Analysis",
+      "products": [
+        "MATLAB",
+        "Simulink"
+      ],
+      "capabilities": [
+        "Numerical analysis",
+        "Control systems",
+        "Signal processing",
+        "Model-based design",
+        "Code generation"
+      ],
+      "formats": [
+        "MAT",
+        "CSV",
+        "JSON",
+        "HDF5",
+        "FMU"
+      ],
+      "auth": "MATLAB Production Server / enterprise credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "hexagon",
+      "brand": "Hexagon",
+      "category": "Metrology / Geospatial / Industrial",
+      "products": [
+        "MSC Software",
+        "HxGN",
+        "Leica Geosystems",
+        "Nexus"
+      ],
+      "capabilities": [
+        "Metrology",
+        "CAE",
+        "Reality capture",
+        "Geospatial",
+        "Manufacturing intelligence"
+      ],
+      "formats": [
+        "STEP",
+        "IGES",
+        "LAS",
+        "E57",
+        "CSV",
+        "HDF5"
+      ],
+      "auth": "Enterprise API credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "trimble",
+      "brand": "Trimble",
+      "category": "Construction / Geospatial",
+      "products": [
+        "SketchUp",
+        "Trimble Connect",
+        "Tekla",
+        "Siteworks"
+      ],
+      "capabilities": [
+        "Construction collaboration",
+        "Structural BIM",
+        "Field positioning",
+        "3D modeling"
+      ],
+      "formats": [
+        "SKP",
+        "IFC",
+        "DWG",
+        "DXF",
+        "LandXML",
+        "CSV"
+      ],
+      "auth": "OAuth 2.0",
+      "mode": "server-required",
+      "risk": "medium"
+    },
+    {
+      "id": "esri",
+      "brand": "Esri ArcGIS",
+      "category": "GIS / Spatial Analysis",
+      "products": [
+        "ArcGIS Online",
+        "ArcGIS Enterprise",
+        "ArcGIS Pro"
+      ],
+      "capabilities": [
+        "Maps",
+        "Feature services",
+        "Geocoding",
+        "Spatial analysis",
+        "Digital twins"
+      ],
+      "formats": [
+        "GeoJSON",
+        "Shapefile",
+        "KML",
+        "GeoTIFF",
+        "LAS",
+        "CSV"
+      ],
+      "auth": "OAuth 2.0 / API key",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "nvidia",
+      "brand": "NVIDIA Omniverse",
+      "category": "Digital Twin / Visualization",
+      "products": [
+        "Omniverse",
+        "USD",
+        "RTX",
+        "Isaac Sim"
+      ],
+      "capabilities": [
+        "OpenUSD collaboration",
+        "Digital twins",
+        "Simulation",
+        "Rendering",
+        "Robotics"
+      ],
+      "formats": [
+        "USD",
+        "USDA",
+        "USDC",
+        "USDZ",
+        "OBJ",
+        "FBX",
+        "glTF"
+      ],
+      "auth": "Nucleus / enterprise credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "unity",
+      "brand": "Unity",
+      "category": "Realtime 3D / XR",
+      "products": [
+        "Unity Engine",
+        "Industry",
+        "Cloud"
+      ],
+      "capabilities": [
+        "Realtime visualization",
+        "XR",
+        "Simulation interfaces",
+        "Digital twins"
+      ],
+      "formats": [
+        "FBX",
+        "OBJ",
+        "glTF",
+        "USD",
+        "JSON"
+      ],
+      "auth": "Cloud / project credentials",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "unreal",
+      "brand": "Epic Games Unreal Engine",
+      "category": "Realtime 3D / Film",
+      "products": [
+        "Unreal Engine",
+        "Twinmotion",
+        "MetaHuman"
+      ],
+      "capabilities": [
+        "Realtime rendering",
+        "Virtual production",
+        "Digital twins",
+        "Cinematics"
+      ],
+      "formats": [
+        "FBX",
+        "USD",
+        "Datasmith",
+        "OBJ",
+        "glTF"
+      ],
+      "auth": "Project / cloud credentials",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "blender",
+      "brand": "Blender",
+      "category": "Open 3D Creation",
+      "products": [
+        "Blender"
+      ],
+      "capabilities": [
+        "Modeling",
+        "Animation",
+        "Rendering",
+        "Geometry Nodes",
+        "Python automation"
+      ],
+      "formats": [
+        "BLEND",
+        "FBX",
+        "OBJ",
+        "USD",
+        "glTF",
+        "STL"
+      ],
+      "auth": "Local automation / optional services",
+      "mode": "local-worker",
+      "risk": "medium"
+    },
+    {
+      "id": "adobe",
+      "brand": "Adobe",
+      "category": "Creative / Documents",
+      "products": [
+        "Photoshop",
+        "Illustrator",
+        "InDesign",
+        "Premiere Pro",
+        "After Effects",
+        "Acrobat",
+        "Firefly",
+        "Substance 3D"
+      ],
+      "capabilities": [
+        "Image editing",
+        "Vector automation",
+        "Document generation",
+        "Video",
+        "Generative media",
+        "PDF services",
+        "Materials"
+      ],
+      "formats": [
+        "PSD",
+        "AI",
+        "INDD",
+        "PDF",
+        "SVG",
+        "PNG",
+        "JPG",
+        "MP4",
+        "GLB"
+      ],
+      "auth": "OAuth / client credentials",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "figma",
+      "brand": "Figma",
+      "category": "Product / Interface Design",
+      "products": [
+        "Figma Design",
+        "FigJam",
+        "Dev Mode"
+      ],
+      "capabilities": [
+        "UI design",
+        "Design systems",
+        "Prototypes",
+        "Comments",
+        "Asset export"
+      ],
+      "formats": [
+        "FIG",
+        "SVG",
+        "PNG",
+        "PDF",
+        "JSON"
+      ],
+      "auth": "OAuth 2.0 / token",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "miro",
+      "brand": "Miro",
+      "category": "Visual Collaboration",
+      "products": [
+        "Miro"
+      ],
+      "capabilities": [
+        "Boards",
+        "Diagrams",
+        "Workshops",
+        "Cards",
+        "Comments"
+      ],
+      "formats": [
+        "JSON",
+        "SVG",
+        "PDF",
+        "PNG"
+      ],
+      "auth": "OAuth 2.0",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "microsoft",
+      "brand": "Microsoft Graph / Azure",
+      "category": "Productivity / Cloud / Engineering",
+      "products": [
+        "Microsoft 365",
+        "Teams",
+        "SharePoint",
+        "OneDrive",
+        "Power Platform",
+        "Azure DevOps",
+        "Azure AI"
+      ],
+      "capabilities": [
+        "Files",
+        "Mail",
+        "Calendar",
+        "Teams",
+        "Identity",
+        "Workflows",
+        "DevOps",
+        "Cloud compute"
+      ],
+      "formats": [
+        "DOCX",
+        "XLSX",
+        "PPTX",
+        "PDF",
+        "JSON",
+        "CSV"
+      ],
+      "auth": "Microsoft Entra OAuth 2.0",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "google",
+      "brand": "Google Workspace / Cloud",
+      "category": "Productivity / Cloud",
+      "products": [
+        "Drive",
+        "Docs",
+        "Sheets",
+        "Gmail",
+        "Calendar",
+        "Meet",
+        "Google Cloud"
+      ],
+      "capabilities": [
+        "Files",
+        "Documents",
+        "Mail",
+        "Calendar",
+        "Events",
+        "Cloud compute",
+        "Data"
+      ],
+      "formats": [
+        "Google Docs",
+        "DOCX",
+        "XLSX",
+        "PDF",
+        "JSON",
+        "CSV"
+      ],
+      "auth": "Google OAuth 2.0 / service account",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "github",
+      "brand": "GitHub",
+      "category": "Code / Automation",
+      "products": [
+        "Repositories",
+        "Actions",
+        "Issues",
+        "Projects",
+        "Models",
+        "Codespaces"
+      ],
+      "capabilities": [
+        "Source control",
+        "CI/CD",
+        "Work tracking",
+        "AI inference",
+        "Packages",
+        "Pages"
+      ],
+      "formats": [
+        "Git",
+        "Markdown",
+        "JSON",
+        "YAML",
+        "Artifacts"
+      ],
+      "auth": "Fine-grained PAT / GitHub App",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "gitlab",
+      "brand": "GitLab",
+      "category": "Code / DevSecOps",
+      "products": [
+        "Repositories",
+        "CI/CD",
+        "Issues",
+        "Security"
+      ],
+      "capabilities": [
+        "Source control",
+        "Pipelines",
+        "Planning",
+        "Security scanning"
+      ],
+      "formats": [
+        "Git",
+        "Markdown",
+        "JSON",
+        "YAML",
+        "Artifacts"
+      ],
+      "auth": "OAuth / access token",
+      "mode": "hybrid",
+      "risk": "medium"
+    },
+    {
+      "id": "atlassian",
+      "brand": "Atlassian",
+      "category": "Work Management / Knowledge",
+      "products": [
+        "Jira",
+        "Confluence",
+        "Trello"
+      ],
+      "capabilities": [
+        "Issues",
+        "Projects",
+        "Documentation",
+        "Roadmaps",
+        "Automation"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "Markdown",
+        "PDF"
+      ],
+      "auth": "OAuth 2.0 / API token",
+      "mode": "server-required",
+      "risk": "medium"
+    },
+    {
+      "id": "slack",
+      "brand": "Slack",
+      "category": "Collaboration",
+      "products": [
+        "Slack"
+      ],
+      "capabilities": [
+        "Messages",
+        "Channels",
+        "Files",
+        "Workflows",
+        "Approvals"
+      ],
+      "formats": [
+        "JSON",
+        "Text",
+        "Files"
+      ],
+      "auth": "OAuth 2.0",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "salesforce",
+      "brand": "Salesforce",
+      "category": "CRM / Enterprise",
+      "products": [
+        "Sales Cloud",
+        "Service Cloud",
+        "Platform",
+        "MuleSoft"
+      ],
+      "capabilities": [
+        "CRM",
+        "Cases",
+        "Opportunities",
+        "Automation",
+        "Integration"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "Documents"
+      ],
+      "auth": "OAuth 2.0",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "servicenow",
+      "brand": "ServiceNow",
+      "category": "Enterprise Workflow",
+      "products": [
+        "ITSM",
+        "App Engine",
+        "CMDB"
+      ],
+      "capabilities": [
+        "Tickets",
+        "Assets",
+        "Approvals",
+        "CMDB",
+        "Workflow"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "Attachments"
+      ],
+      "auth": "OAuth 2.0",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "sap",
+      "brand": "SAP",
+      "category": "ERP / Supply Chain / PLM",
+      "products": [
+        "S/4HANA",
+        "BTP",
+        "PLM",
+        "Digital Manufacturing"
+      ],
+      "capabilities": [
+        "ERP",
+        "BOM",
+        "Procurement",
+        "Manufacturing",
+        "Asset management"
+      ],
+      "formats": [
+        "OData",
+        "JSON",
+        "XML",
+        "CSV",
+        "IDoc"
+      ],
+      "auth": "OAuth / enterprise identity",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "oracle",
+      "brand": "Oracle",
+      "category": "ERP / Database / Cloud",
+      "products": [
+        "Fusion Cloud",
+        "Oracle Database",
+        "OCI",
+        "Primavera"
+      ],
+      "capabilities": [
+        "ERP",
+        "Database",
+        "Projects",
+        "Cloud",
+        "Construction planning"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "SQL",
+        "XML"
+      ],
+      "auth": "OAuth / signed requests",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "aws",
+      "brand": "Amazon Web Services",
+      "category": "Cloud / Data / AI",
+      "products": [
+        "S3",
+        "Lambda",
+        "Bedrock",
+        "Step Functions",
+        "IoT TwinMaker"
+      ],
+      "capabilities": [
+        "Object storage",
+        "Serverless compute",
+        "AI",
+        "Workflow",
+        "Digital twins"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "Parquet",
+        "Artifacts"
+      ],
+      "auth": "IAM / Cognito",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "azure",
+      "brand": "Microsoft Azure",
+      "category": "Cloud / AI / Digital Twin",
+      "products": [
+        "Functions",
+        "Blob Storage",
+        "AI Foundry",
+        "Digital Twins",
+        "Service Bus"
+      ],
+      "capabilities": [
+        "Compute",
+        "Storage",
+        "AI",
+        "Events",
+        "Digital twins"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "Parquet",
+        "Artifacts"
+      ],
+      "auth": "Entra ID / managed identity",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "gcp",
+      "brand": "Google Cloud",
+      "category": "Cloud / Data / AI",
+      "products": [
+        "Cloud Run",
+        "Storage",
+        "Vertex AI",
+        "BigQuery",
+        "Pub/Sub"
+      ],
+      "capabilities": [
+        "Compute",
+        "Storage",
+        "AI",
+        "Analytics",
+        "Events"
+      ],
+      "formats": [
+        "JSON",
+        "CSV",
+        "Parquet",
+        "Artifacts"
+      ],
+      "auth": "OAuth / service account",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "snowflake",
+      "brand": "Snowflake",
+      "category": "Data Cloud",
+      "products": [
+        "Snowflake",
+        "Cortex"
+      ],
+      "capabilities": [
+        "Warehouse",
+        "Data sharing",
+        "Analytics",
+        "AI"
+      ],
+      "formats": [
+        "SQL",
+        "CSV",
+        "JSON",
+        "Parquet"
+      ],
+      "auth": "OAuth / key pair",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "databricks",
+      "brand": "Databricks",
+      "category": "Data / AI Engineering",
+      "products": [
+        "Lakehouse",
+        "MLflow",
+        "Workflows"
+      ],
+      "capabilities": [
+        "Data engineering",
+        "Analytics",
+        "ML lifecycle",
+        "Agent workflows"
+      ],
+      "formats": [
+        "Delta",
+        "Parquet",
+        "JSON",
+        "CSV"
+      ],
+      "auth": "OAuth / service principal",
+      "mode": "server-required",
+      "risk": "high"
+    },
+    {
+      "id": "openai",
+      "brand": "OpenAI",
+      "category": "AI Models",
+      "products": [
+        "Responses API",
+        "Realtime API",
+        "Embeddings"
+      ],
+      "capabilities": [
+        "Reasoning",
+        "Generation",
+        "Vision",
+        "Voice",
+        "Tool use"
+      ],
+      "formats": [
+        "JSON",
+        "Text",
+        "Audio",
+        "Images"
+      ],
+      "auth": "API key / OAuth where supported",
+      "mode": "server-preferred",
+      "risk": "high"
+    },
+    {
+      "id": "anthropic",
+      "brand": "Anthropic",
+      "category": "AI Models",
+      "products": [
+        "Claude API"
+      ],
+      "capabilities": [
+        "Reasoning",
+        "Long context",
+        "Tool use",
+        "Vision"
+      ],
+      "formats": [
+        "JSON",
+        "Text",
+        "Images"
+      ],
+      "auth": "API key",
+      "mode": "server-preferred",
+      "risk": "high"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "Concept-to-Engineered Product",
+      "steps": [
+        "Figma/Miro requirements",
+        "Autodesk Fusion or Dassault/Siemens CAD",
+        "Ansys/Altair/Simcenter analysis",
+        "PLM release",
+        "Adobe documentation",
+        "GitHub audit package"
+      ],
+      "approval": "Founder approves design freeze and release"
+    },
+    {
+      "name": "Building Digital Twin",
+      "steps": [
+        "Revit/AutoCAD or Bentley authoring",
+        "IFC/APS model translation",
+        "Esri geospatial context",
+        "NVIDIA Omniverse or Unreal visualization",
+        "Azure/AWS digital-twin telemetry",
+        "Chairman executive dashboard"
+      ],
+      "approval": "Founder approves publication and operational connection"
+    },
+    {
+      "name": "Industrial Design-to-Manufacture",
+      "steps": [
+        "Adobe/Figma concept assets",
+        "Fusion/Inventor/SOLIDWORKS/CATIA design",
+        "Simulation and optimization",
+        "BOM into SAP/Oracle",
+        "Supplier package via SharePoint/Drive",
+        "Quality and metrology feedback"
+      ],
+      "approval": "Founder approves procurement and manufacturing release"
+    },
+    {
+      "name": "WonderGate Cinematic Pipeline",
+      "steps": [
+        "Chairman story and franchise brief",
+        "Adobe concept art and documents",
+        "Blender/3ds Max/Substance assets",
+        "Unreal virtual production",
+        "Premiere/After Effects finishing",
+        "GitHub versioned production ledger"
+      ],
+      "approval": "Founder approves canonical assets and final release"
+    },
+    {
+      "name": "Engineering Change Control",
+      "steps": [
+        "Issue from Jira/ServiceNow",
+        "Affected-model lookup",
+        "CAD/BIM revision",
+        "Simulation revalidation",
+        "PLM/BOM update",
+        "Teams/Slack review",
+        "Immutable decision and audit record"
+      ],
+      "approval": "Founder or delegated engineering authority approves change"
+    }
+  ]
+}

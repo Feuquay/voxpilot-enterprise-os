@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#070707">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Chairman">
+  <title>VoxPilot Chairman</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div id="setupOverlay" class="overlay hidden">
+  <div class="setup-card">
+    <div class="eyebrow">VOXPILOT NEXUS</div>
+    <h1>Initialize Chairman</h1>
+    <p>This installation runs on this iPhone and can use GitHub for deployment, live AI, and encrypted continuity.</p>
+    <label>Founder name<input id="setupFounder" value="Lewis Franklin Feuquay"></label>
+    <label>GitHub username<input id="setupGithub" placeholder="Your GitHub username"></label>
+    <label>Chairman repository<input id="setupRepo" value="voxpilot-chairman"></label>
+    <button id="finishSetup" class="primary full">Initialize Runtime</button>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div>
+      <div class="eyebrow">VOXPILOT NEXUS</div>
+      <h1>Chairman</h1>
+      <p id="statusLine">Founder-governed executive runtime</p>
+    </div>
+    <button id="lockButton" class="icon-button" aria-label="Chairman Lock">◇</button>
+  </header>
+
+  <nav id="tabs">
+    <button data-tab="command" class="active">Command</button>
+    <button data-tab="brief">Brief</button>
+    <button data-tab="actions">Actions</button>
+    <button data-tab="integrations">Integrations</button>
+    <button data-tab="memory">Memory</button>
+    <button data-tab="ventures">Ventures</button>
+    <button data-tab="tasks">Tasks</button>
+    <button data-tab="decisions">Decisions</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+
+  <main>
+    <section id="command" class="tab active">
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <textarea id="commandInput" placeholder="Give the Chairman a command"></textarea>
+        <div class="row">
+          <button id="micButton">Speak</button>
+          <button id="newSession">New Session</button>
+          <button id="sendButton" class="primary">Execute</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="brief" class="tab">
+      <h2>Executive Brief</h2>
+      <div id="briefContent"></div>
+    </section>
+
+    <section id="actions" class="tab">
+      <h2>Governed Actions</h2>
+      <input id="actionTitle" placeholder="Proposed action">
+      <textarea id="actionRationale" placeholder="Why this action increases enterprise value"></textarea>
+      <select id="actionRisk">
+        <option value="low">Low risk</option>
+        <option value="medium">Medium risk</option>
+        <option value="high">High risk</option>
+      </select>
+      <button id="proposeAction" class="primary full">Create Proposal</button>
+      <div id="actionList"></div>
+    </section>
+
+
+
+    <section id="integrations" class="tab">
+      <h2>Design & Engineering Interconnections</h2>
+      <div class="notice">Chairman governs intent, routing, permissions, approvals, provenance, and audit. Vendor credentials remain disconnected until explicitly configured. “Ready” means the connector architecture is defined—not that an external account is already authorized.</div>
+      <input id="integrationSearch" placeholder="Search Autodesk, simulation, CAD, BIM, media, cloud…">
+      <select id="integrationCategory"><option value="">All categories</option></select>
+      <div class="row">
+        <button id="showArchitecture">Architecture</button>
+        <button id="showWorkflows">Workflows</button>
+      </div>
+      <div id="integrationSummary"></div>
+      <div id="integrationList"></div>
+    </section>
+
+    <section id="memory" class="tab">
+      <h2>Persistent Memory</h2>
+      <input id="memorySearch" placeholder="Search stored memory">
+      <select id="memoryType">
+        <option>Founder memory</option>
+        <option>Doctrine</option>
+        <option>Verified fact</option>
+        <option>Goal</option>
+        <option>Hypothesis</option>
+        <option>Constraint</option>
+        <option>Correction</option>
+      </select>
+      <textarea id="memoryInput" placeholder="Add Founder-approved durable memory"></textarea>
+      <button id="saveMemory" class="primary full">Store Memory</button>
+      <div id="memoryList"></div>
+    </section>
+
+    <section id="ventures" class="tab">
+      <h2>Enterprise Portfolio</h2>
+      <div id="ventureList"></div>
+    </section>
+
+    <section id="tasks" class="tab">
+      <h2>Executive Tasks</h2>
+      <input id="taskTitle" placeholder="Task">
+      <label>Due date and time<input id="taskDue" type="datetime-local"></label>
+      <select id="taskKind">
+        <option value="reminder">Reminder</option>
+        <option value="brief">Generate executive brief</option>
+        <option value="backup">Request encrypted backup</option>
+      </select>
+      <button id="saveTask" class="primary full">Create Task</button>
+      <div class="notice">Because iOS suspends static web apps, due tasks are evaluated whenever Chairman opens or returns to the foreground.</div>
+      <div id="taskList"></div>
+    </section>
+
+    <section id="decisions" class="tab">
+      <h2>Decision Register</h2>
+      <input id="decisionTitle" placeholder="Decision title">
+      <textarea id="decisionText" placeholder="Decision and rationale"></textarea>
+      <button id="saveDecision" class="primary full">Record Decision</button>
+      <div id="decisionList"></div>
+    </section>
+
+    <section id="settings" class="tab">
+      <h2>Runtime Settings</h2>
+      <label>AI provider
+        <select id="provider">
+          <option value="local">Local Chairman Engine</option>
+          <option value="github">GitHub Models</option>
+          <option value="openai">OpenAI API</option>
+          <option value="anthropic">Anthropic API</option>
+        </select>
+      </label>
+      <label>Model<input id="model" placeholder="openai/gpt-4.1"></label>
+      <label>AI token or API key<input id="apiKey" type="password" placeholder="Stored only in this browser session"></label>
+      <label>Optional secure proxy URL<input id="proxyUrl" placeholder="Optional"></label>
+      <button id="saveSettings" class="primary full">Save AI Settings</button>
+
+      <h2>Encrypted GitHub Continuity</h2>
+      <label>GitHub username<input id="githubOwner"></label>
+      <label>Private repository<input id="githubRepo" value="voxpilot-chairman"></label>
+      <label>Fine-grained GitHub token<input id="githubToken" type="password"></label>
+      <label>Encryption passphrase<input id="syncPassphrase" type="password"></label>
+      <label>Encrypted backup path<input id="syncPath" value="private/chairman-runtime.enc.json"></label>
+      <div class="row">
+        <button id="pullCloud">Restore</button>
+        <button id="pushCloud" class="primary">Encrypted Backup</button>
+      </div>
+      <div id="syncStatus" class="notice">The database is encrypted on this iPhone before upload.</div>
+
+      <h2>Local Continuity</h2>
+      <button id="exportData" class="full">Export Chairman Data</button>
+      <label class="importLabel">Import Chairman Data<input id="importData" type="file" accept="application/json"></label>
+      <button id="clearData" class="danger full">Erase Local Runtime</button>
+    </section>
+  </main>
+
+  <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
+</div>
+<script src="./app.js"></script>
+</body>
+</html>

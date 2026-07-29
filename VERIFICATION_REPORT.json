@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-07-28T21:50:10.567423",
+  "result": "PASS",
+  "checks": {
+    "javascript_syntax": true,
+    "connector_count": true,
+    "autodesk_first_class": true,
+    "engineering_categories": true,
+    "neutral_formats": true,
+    "governed_states": true,
+    "architecture_view": true,
+    "workflow_view": true,
+    "offline_catalog": true,
+    "no_hardcoded_secret": true
+  },
+  "node_check_stderr": ""
+}
