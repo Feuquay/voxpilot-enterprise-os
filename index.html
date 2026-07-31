@@ -25,12 +25,30 @@
   </div>
 </div>
 
+
+<div id="liveAIOverlay" class="overlay hidden">
+  <div class="setup-card">
+    <div class="eyebrow">VOXPILOT NEXUS</div>
+    <h1>Activate Live Chairman</h1>
+    <p>The deterministic fallback has been disabled as a substitute for intelligence. Activate GitHub Models so Chairman can reason conversationally using your persistent Founder context.</p>
+    <label>GitHub Models token
+      <input id="liveToken" type="password" placeholder="Fine-grained token with Models: read">
+    </label>
+    <label>Model
+      <input id="liveModel" value="openai/gpt-4.1">
+    </label>
+    <button id="activateLiveAI" class="primary full">Activate and Test Chairman</button>
+    <button id="continueOffline" class="full">Continue in Offline Diagnostic Mode</button>
+    <div id="activationStatus" class="notice">The token is stored only in this browser session and is never committed to GitHub.</div>
+  </div>
+</div>
+
 <div id="app">
   <header>
     <div>
       <div class="eyebrow">VOXPILOT NEXUS</div>
       <h1>Chairman</h1>
-      <p id="statusLine">Founder-governed executive runtime</p>
+      <p id="statusLine">Founder-governed executive runtime</p><div id="aiState" class="ai-state offline">Offline diagnostic</div>
     </div>
     <button id="lockButton" class="icon-button" aria-label="Chairman Lock">◇</button>
   </header>
@@ -51,11 +69,11 @@
     <section id="command" class="tab active">
       <div id="messages" class="messages"></div>
       <div class="composer">
-        <textarea id="commandInput" placeholder="Give the Chairman a command"></textarea>
+        <textarea id="commandInput" placeholder="Speak directly to Chairman…"></textarea>
         <div class="row">
           <button id="micButton">Speak</button>
           <button id="newSession">New Session</button>
-          <button id="sendButton" class="primary">Execute</button>
+          <button id="sendButton" class="primary">Send</button>
         </div>
       </div>
     </section>
@@ -141,8 +159,8 @@
       <h2>Runtime Settings</h2>
       <label>AI provider
         <select id="provider">
-          <option value="local">Local Chairman Engine</option>
-          <option value="github">GitHub Models</option>
+          <option value="github">GitHub Models — Live Chairman</option>
+          <option value="local">Offline Diagnostic — Not Live AI</option>
           <option value="openai">OpenAI API</option>
           <option value="anthropic">Anthropic API</option>
         </select>
@@ -150,7 +168,7 @@
       <label>Model<input id="model" placeholder="openai/gpt-4.1"></label>
       <label>AI token or API key<input id="apiKey" type="password" placeholder="Stored only in this browser session"></label>
       <label>Optional secure proxy URL<input id="proxyUrl" placeholder="Optional"></label>
-      <button id="saveSettings" class="primary full">Save AI Settings</button>
+      <div class="row"><button id="testAI">Test Connection</button><button id="saveSettings" class="primary">Save AI Settings</button></div>
 
       <h2>Encrypted GitHub Continuity</h2>
       <label>GitHub username<input id="githubOwner"></label>

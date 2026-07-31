@@ -48,7 +48,7 @@ function load(){try{const x=JSON.parse(localStorage.getItem(DB_KEY));return x||s
 function persist(){localStorage.setItem(DB_KEY,JSON.stringify(state))}
 function loadSession(key,fallback){try{return JSON.parse(sessionStorage.getItem(key))||fallback}catch{return fallback}}
 let state=load();
-let ai=loadSession(SESSION_KEY,{provider:"local",model:"openai/gpt-4.1",apiKey:"",proxyUrl:""});
+let ai=loadSession(SESSION_KEY,{provider:"github",model:"openai/gpt-4.1",apiKey:"",proxyUrl:""});
 let sync=loadSession(SYNC_KEY,{owner:"",repo:"voxpilot-chairman",token:"",passphrase:"",path:"private/chairman-runtime.enc.json"});
 let currentSession=null;
 function saveAI(){sessionStorage.setItem(SESSION_KEY,JSON.stringify(ai))}
@@ -74,87 +74,166 @@ function domainsFor(q){
  const out=rules.filter(([,r])=>r.test(q)).map(([n])=>n);return out.length?out:["Portfolio Strategy"];
 }
 function localEngine(prompt){
- const q=prompt.toLowerCase(), memories=relevantMemories(prompt), domains=domainsFor(q);
- let conclusion="Preserve VoxPilot Nexus as the central platform, close the highest-value verified gate, and do not claim external execution until the relevant permission and evidence exist.";
- if(/standalone|chairman app|iphone|github/.test(q)) conclusion="The controlling implementation is this GitHub Pages PWA: it runs on the iPhone, retains durable local state, can invoke GitHub Models, and encrypts continuity backups before storing them in the Founder-controlled repository.";
- else if(/next step|what now|priority/.test(q)){const v=state.ventures.slice().sort((a,b)=>a.priority-b.priority)[0];conclusion=`The next controlling priority is ${v.name}: ${v.gate}.`;}
- const unknowns=ai.provider==="local"?["No external model was consulted; synthesis uses deterministic doctrine and stored state."]:[];
- return {text:`CHAIRMAN SYNTHESIS
+ const memories=relevantMemories(prompt,10);
+ return {
+  text:`Live Chairman is not activated on this browser session.
 
-${conclusion}
+I preserved your command and retrieved ${memories.length} relevant Founder memory item${memories.length===1?"":"s"}, but I will not imitate live executive intelligence with a canned synthesis.
 
-CONSULTED DOMAINS
-${domains.map(x=>"• "+x).join("\n")}
-
-RELEVANT FOUNDER MEMORY
-${memories.length?memories.map(m=>`• [${m.type}] ${m.content}`).join("\n"):"• No directly matching durable memory."}
-
-GOVERNANCE
-• Founder authority remains final.
-• Consequential execution requires an approved action proposal.
-• Evidence classifications remain distinct.
-
-UNKNOWNS
-${unknowns.length?unknowns.map(x=>"• "+x).join("\n"):"• External-provider output should still be verified before consequential use."}`,confidence:memories.length?0.9:0.78,domains};
+Open Settings and activate GitHub Models, or tap the Chairman status badge to enter your token.`,
+  confidence:1,
+  domains:["Runtime diagnostics"],
+  diagnostic:true
+ };
 }
 function systemPrompt(){
- return `You are the VoxPilot Chairman Founder Replicant for ${state.founder.name}. ${doctrine.authority} ${doctrine.optimization}
-Rules:
-${doctrine.rules.map(x=>"- "+x).join("\n")}
-Return an executive synthesis with: conclusion, verified facts, goals/hypotheses, consulted domains, disagreements, unknowns, next action, and whether Founder approval is required.`;
+ return `You are Chairman: the persistent executive cognition runtime inside VoxPilot Nexus for Founder ${state.founder.name}.
+
+IDENTITY AND AUTHORITY
+- You are not a generic assistant and you do not call the Founder "Chairman."
+- The human Founder retains final authority.
+- Your continuity comes from VoxPilot doctrine, durable memory, decisions, sessions, approvals, and audit state—not from any one model provider.
+- The model is a replaceable reasoning substrate serving the persistent VoxPilot runtime.
+
+OPERATING OBJECTIVE
+${doctrine.optimization}
+
+BEHAVIOR
+- Respond directly to the Founder's actual command.
+- Converse naturally. Do not force repetitive headings, boilerplate governance language, or canned "synthesis" templates.
+- Recall and integrate relevant Founder memory, enterprise architecture, ventures, prior decisions, and recent conversation.
+- Distinguish verified facts, Founder-stated targets, inference, and unknowns when that distinction materially matters.
+- Challenge weak assumptions clearly, but remain inside the Founder-defined VoxPilot framework unless asked to compare alternatives.
+- Preserve dissent from specialist domains when useful.
+- Never claim that an external action, connector, code merge, model, or file exists unless the supplied runtime context supports it.
+- Consequential external execution requires Founder approval.
+- When asked who you are, introduce yourself as the Chairman Runtime inside VoxPilot Nexus and explain your role in substantive, human language.
+- Optimize for high information density and decisive next actions, not generic advice.
+
+The Founder expects deep continuity and executive-level reasoning.`;
 }
 async function providerCall(prompt){
  if(ai.provider==="local")return localEngine(prompt);
- if(!ai.apiKey&&!ai.proxyUrl)throw new Error("Enter an AI token or secure proxy in Settings.");
- const memory=relevantMemories(prompt,30);
- const context=`FOUNDER COMMAND:
-${prompt}
+ if(!ai.apiKey&&!ai.proxyUrl)throw new Error("LIVE_AI_NOT_CONFIGURED");
 
-RELEVANT DURABLE MEMORY:
-${memory.map(m=>`- [${m.type}] ${m.content}`).join("\n")}
+ const memory=relevantMemories(prompt,40);
+ const session=ensureSession();
+ const transcript=session.messages
+  .filter(m=>!m.meta?.pending)
+  .slice(-24)
+  .map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.content}));
 
-ENTERPRISE PORTFOLIO:
-${state.ventures.map(v=>`- ${v.name}: ${v.status}; gate: ${v.gate}`).join("\n")}
+ const enterpriseContext=`PERSISTENT FOUNDER CONTEXT
 
-APPROVED DECISIONS:
-${state.decisions.slice(0,25).map(d=>`- ${d.title}: ${d.text}`).join("\n")}`;
+DURABLE MEMORY
+${memory.length?memory.map(m=>`- [${m.type}] ${m.content}`).join("\n"):"- No directly matching durable memories."}
+
+ENTERPRISE PORTFOLIO
+${state.ventures.map(v=>`- ${v.name}: status=${v.status}; role=${v.role}; controlling gate=${v.gate}`).join("\n")}
+
+FOUNDER DECISIONS
+${state.decisions.slice(0,30).map(d=>`- ${d.title}: ${d.text}`).join("\n")||"- No recorded decisions."}
+
+ACTION GOVERNANCE
+${state.actions.slice(0,20).map(a=>`- ${a.title}: ${a.status}; risk=${a.risk}; rationale=${a.rationale}`).join("\n")||"- No action proposals."}
+
+CURRENT COMMAND
+${prompt}`;
+
  if(ai.proxyUrl){
-  const r=await fetch(ai.proxyUrl,{method:"POST",headers:{"Content-Type":"application/json","Authorization":ai.apiKey?`Bearer ${ai.apiKey}`:""},body:JSON.stringify({provider:ai.provider,model:ai.model,system:systemPrompt(),prompt:context})});
-  const d=await r.json();if(!r.ok)throw new Error(d.message||`Proxy failed (${r.status})`);
-  return {text:d.text||d.output||JSON.stringify(d),confidence:d.confidence||.84,domains:["Secure proxy"]};
+  const r=await fetch(ai.proxyUrl,{
+   method:"POST",
+   headers:{"Content-Type":"application/json","Authorization":ai.apiKey?`Bearer ${ai.apiKey}`:""},
+   body:JSON.stringify({provider:ai.provider,model:ai.model,system:systemPrompt(),messages:transcript,context:enterpriseContext})
+  });
+  const d=await r.json();if(!r.ok)throw new Error(d.message||`Secure runtime failed (${r.status})`);
+  return {text:d.text||d.output||JSON.stringify(d),confidence:d.confidence||.88,domains:d.domains||["Secure Chairman Runtime"]};
  }
+
  if(ai.provider==="github"){
-  const r=await fetch("https://models.github.ai/inference/chat/completions",{method:"POST",headers:{"Accept":"application/vnd.github+json","Authorization":`Bearer ${ai.apiKey}`,"X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},body:JSON.stringify({model:ai.model||"openai/gpt-4.1",messages:[{role:"system",content:systemPrompt()},{role:"user",content:context}],temperature:.2,max_tokens:2400})});
-  const d=await r.json();if(!r.ok)throw new Error(d.message||d.error?.message||`GitHub Models failed (${r.status})`);
-  return {text:d.choices?.[0]?.message?.content||"No text returned.",confidence:.86,domains:["GitHub Models"]};
+  const messages=[
+   {role:"system",content:systemPrompt()},
+   ...transcript.slice(0,-1),
+   {role:"user",content:enterpriseContext}
+  ];
+  const r=await fetch("https://models.github.ai/inference/chat/completions",{
+   method:"POST",
+   headers:{
+    "Accept":"application/vnd.github+json",
+    "Authorization":`Bearer ${ai.apiKey}`,
+    "X-GitHub-Api-Version":"2022-11-28",
+    "Content-Type":"application/json"
+   },
+   body:JSON.stringify({
+    model:ai.model||"openai/gpt-4.1",
+    messages,
+    temperature:.35,
+    max_tokens:3500
+   })
+  });
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.message||d.error?.message||`GitHub Models failed (${r.status})`);
+  return {text:d.choices?.[0]?.message?.content||"The model returned no response.",confidence:.9,domains:["Live Chairman · GitHub Models"]};
  }
+
  if(ai.provider==="openai"){
-  const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${ai.apiKey}`},body:JSON.stringify({model:ai.model||"gpt-4.1-mini",input:[{role:"system",content:systemPrompt()},{role:"user",content:context}]})});
+  const input=[
+   {role:"system",content:systemPrompt()},
+   ...transcript.slice(0,-1),
+   {role:"user",content:enterpriseContext}
+  ];
+  const r=await fetch("https://api.openai.com/v1/responses",{
+   method:"POST",
+   headers:{"Content-Type":"application/json","Authorization":`Bearer ${ai.apiKey}`},
+   body:JSON.stringify({model:ai.model||"gpt-4.1-mini",input})
+  });
   const d=await r.json();if(!r.ok)throw new Error(d.error?.message||`OpenAI failed (${r.status})`);
-  return {text:d.output_text||d.output?.flatMap(x=>x.content||[]).map(x=>x.text||"").join("\n")||"No text returned.",confidence:.86,domains:["OpenAI"]};
+  return {text:d.output_text||d.output?.flatMap(x=>x.content||[]).map(x=>x.text||"").join("\n")||"The model returned no response.",confidence:.9,domains:["Live Chairman · OpenAI"]};
  }
+
  if(ai.provider==="anthropic"){
-  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":ai.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:ai.model||"claude-sonnet-4-20250514",max_tokens:2400,system:systemPrompt(),messages:[{role:"user",content:context}]})});
+  const anthropicMessages=transcript.slice(0,-1).concat([{role:"user",content:enterpriseContext}]);
+  const r=await fetch("https://api.anthropic.com/v1/messages",{
+   method:"POST",
+   headers:{
+    "Content-Type":"application/json",
+    "x-api-key":ai.apiKey,
+    "anthropic-version":"2023-06-01",
+    "anthropic-dangerous-direct-browser-access":"true"
+   },
+   body:JSON.stringify({model:ai.model||"claude-sonnet-4-20250514",max_tokens:3500,system:systemPrompt(),messages:anthropicMessages})
+  });
   const d=await r.json();if(!r.ok)throw new Error(d.error?.message||`Anthropic failed (${r.status})`);
-  return {text:(d.content||[]).map(x=>x.text||"").join("\n"),confidence:.86,domains:["Anthropic"]};
+  return {text:(d.content||[]).map(x=>x.text||"").join("\n"),confidence:.9,domains:["Live Chairman · Anthropic"]};
  }
- throw new Error("Unsupported provider.");
+ throw new Error("Unsupported AI provider.");
 }
 async function execute(){
- const box=$("#commandInput"),prompt=box.value.trim();if(!prompt)return;box.value="";addMessage("user",prompt);
- const pending={id:uid(),role:"assistant",content:"Consulting Chairman runtime…",meta:{pending:true},at:now()};
+ const box=$("#commandInput"),prompt=box.value.trim();if(!prompt)return;
+ box.value="";addMessage("user",prompt);
+ const pending={id:uid(),role:"assistant",content:"Chairman is reasoning…",meta:{pending:true},at:now()};
  ensureSession().messages.push(pending);persist();renderMessages();
- try{const out=await providerCall(prompt);pending.content=out.text;pending.meta={confidence:out.confidence,domains:out.domains};audit("executive_response",`${ai.provider}; confidence ${out.confidence}`)}
- catch(e){pending.content=`RUNTIME ERROR
-
-${e.message}
-
-Switch to Local Chairman Engine in Settings to continue without external AI.`;pending.meta={error:true};audit("provider_error",e.message)}
- persist();renderMessages();
+ try{
+  const out=await providerCall(prompt);
+  pending.content=out.text;
+  pending.meta={confidence:out.confidence,domains:out.domains,diagnostic:out.diagnostic};
+  audit("executive_response",`${ai.provider}; confidence ${out.confidence}`);
+ }catch(e){
+  if(e.message==="LIVE_AI_NOT_CONFIGURED"){
+   pending.content="Live Chairman requires activation. Enter your GitHub Models token once for this browser session.";
+   pending.meta={error:true};
+   $("#liveAIOverlay").classList.remove("hidden");
+  }else{
+   pending.content=`Chairman connection error: ${e.message}`;
+   pending.meta={error:true};
+  }
+  audit("provider_error",e.message);
+ }
+ persist();renderMessages();updateAIState();
 }
 function renderMessages(){
  const rows=currentSession?.messages||[];
- $("#messages").innerHTML=rows.length?rows.map(x=>`<div class="message ${x.role}">${esc(x.content)}${x.meta?.confidence?`<div class="meta">Confidence ${Math.round(x.meta.confidence*100)}% · ${(x.meta.domains||[]).join(", ")}</div>`:""}</div>`).join(""):`<div class="message assistant">Chairman Runtime ready.
+ $("#messages").innerHTML=rows.length?rows.map(x=>`<div class="message ${x.role}${x.meta?.pending?" typing":""}">${esc(x.content)}${x.meta?.confidence?`<div class="meta">Confidence ${Math.round(x.meta.confidence*100)}% · ${(x.meta.domains||[]).join(", ")}</div>`:""}</div>`).join(""):`<div class="message assistant">Chairman Runtime ready.
 
 This application runs from GitHub Pages on your iPhone. It preserves memory, sessions, decisions, action approvals, tasks, ventures, and audit state on this device.</div>`;
  $("#messages").scrollTop=$("#messages").scrollHeight;
@@ -230,10 +309,35 @@ function showWorkflows(){
  $("#integrationList").innerHTML=integrationCatalog.workflows.map(w=>card(w.name,w.steps.map((s,i)=>`${i+1}. ${esc(s)}`).join("<br>"),w.approval)).join("");
 }
 
+
+function updateAIState(){
+ const live=ai.provider!=="local"&&Boolean(ai.apiKey||ai.proxyUrl);
+ const badge=$("#aiState");
+ if(badge){
+  badge.className=`ai-state ${live?"live":"offline"}`;
+  badge.textContent=live?`Live · ${ai.provider}`:"Offline diagnostic";
+  badge.onclick=()=>{if(!live)$("#liveAIOverlay").classList.remove("hidden")};
+ }
+ $("#statusLine").textContent=state.chairman_lock
+  ?`Chairman Lock active · ${live?"Live intelligence":"Offline diagnostic"}`
+  :`${state.founder.name} · Founder authority`;
+}
+async function testAIConnection(token=null,model=null){
+ const previous={...ai};
+ if(token!==null)ai={...ai,provider:"github",apiKey:token,model:model||"openai/gpt-4.1"};
+ try{
+  const out=await providerCall("Respond with exactly: Chairman live.");
+  if(!out.text.toLowerCase().includes("chairman"))throw new Error("Unexpected model response.");
+  return out;
+ }catch(e){
+  ai=previous;
+  throw e;
+ }
+}
 function renderSettings(){
  $("#provider").value=ai.provider;$("#model").value=ai.model||"";$("#apiKey").value=ai.apiKey||"";$("#proxyUrl").value=ai.proxyUrl||"";
  $("#githubOwner").value=sync.owner||state.founder.github||"";$("#githubRepo").value=sync.repo||"voxpilot-chairman";$("#githubToken").value=sync.token||"";$("#syncPassphrase").value=sync.passphrase||"";$("#syncPath").value=sync.path||"private/chairman-runtime.enc.json";
- $("#lockButton").classList.toggle("locked",state.chairman_lock);$("#statusLine").textContent=state.chairman_lock?"Chairman Lock active":`${state.founder.name} · Founder authority`;
+ $("#lockButton").classList.toggle("locked",state.chairman_lock);updateAIState();
 }
 function bytes64(b){let s="";for(let i=0;i<b.length;i+=32768)s+=String.fromCharCode(...b.subarray(i,i+32768));return btoa(s)}
 function from64(s){const x=atob(s.replace(/\n/g,"")),b=new Uint8Array(x.length);for(let i=0;i<x.length;i++)b[i]=x.charCodeAt(i);return b}
@@ -254,7 +358,41 @@ $("#memorySearch").oninput=renderMemories;
 $("#saveDecision").onclick=()=>{const title=$("#decisionTitle").value.trim(),text=$("#decisionText").value.trim();if(!title||!text)return;state.decisions.unshift({id:uid(),title,text,created_at:now(),authority:"Founder"});$("#decisionTitle").value="";$("#decisionText").value="";audit("decision_recorded",title);renderDecisions()};
 $("#proposeAction").onclick=()=>{const title=$("#actionTitle").value.trim(),rationale=$("#actionRationale").value.trim();if(!title||!rationale)return;state.actions.unshift({id:uid(),title,rationale,risk:$("#actionRisk").value,status:"pending",created_at:now()});$("#actionTitle").value="";$("#actionRationale").value="";audit("action_proposed",title);renderActions();renderBrief()};
 $("#saveTask").onclick=()=>{const title=$("#taskTitle").value.trim(),due=$("#taskDue").value;if(!title||!due)return;state.tasks.unshift({id:uid(),title,due_at:new Date(due).toISOString(),kind:$("#taskKind").value,status:"pending",created_at:now()});$("#taskTitle").value="";audit("task_created",title);renderTasks()};
-$("#saveSettings").onclick=()=>{ai={provider:$("#provider").value,model:$("#model").value.trim(),apiKey:$("#apiKey").value.trim(),proxyUrl:$("#proxyUrl").value.trim()};saveAI();audit("ai_settings",ai.provider);alert("AI settings saved for this browser session.")};
+$("#saveSettings").onclick=()=>{
+ ai={provider:$("#provider").value,model:$("#model").value.trim(),apiKey:$("#apiKey").value.trim(),proxyUrl:$("#proxyUrl").value.trim()};
+ saveAI();audit("ai_settings",ai.provider);updateAIState();
+ alert(ai.provider==="local"?"Offline diagnostic mode selected.":"Live Chairman settings saved for this browser session.");
+};
+$("#testAI").onclick=async()=>{
+ $("#testAI").disabled=true;$("#testAI").textContent="Testing…";
+ try{
+  ai={provider:$("#provider").value,model:$("#model").value.trim(),apiKey:$("#apiKey").value.trim(),proxyUrl:$("#proxyUrl").value.trim()};
+  await testAIConnection();saveAI();updateAIState();alert("Live Chairman connection verified.");
+ }catch(e){alert("Connection failed: "+e.message)}
+ finally{$("#testAI").disabled=false;$("#testAI").textContent="Test Connection"}
+};
+$("#activateLiveAI").onclick=async()=>{
+ const token=$("#liveToken").value.trim(),model=$("#liveModel").value.trim()||"openai/gpt-4.1";
+ if(!token){$("#activationStatus").textContent="Enter a GitHub token with Models: read.";return}
+ $("#activateLiveAI").disabled=true;$("#activateLiveAI").textContent="Testing live Chairman…";
+ $("#activationStatus").textContent="Connecting to GitHub Models…";
+ try{
+  await testAIConnection(token,model);
+  ai={provider:"github",model,apiKey:token,proxyUrl:""};saveAI();
+  $("#provider").value="github";$("#model").value=model;$("#apiKey").value=token;
+  $("#liveAIOverlay").classList.add("hidden");updateAIState();
+  audit("live_ai_activated",model);
+  addMessage("assistant","I am live. I am the Chairman Runtime inside VoxPilot Nexus. Speak to me directly.",{confidence:.95,domains:["Live Chairman · GitHub Models"]});
+ }catch(e){
+  $("#activationStatus").textContent="Activation failed: "+e.message;
+ }finally{
+  $("#activateLiveAI").disabled=false;$("#activateLiveAI").textContent="Activate and Test Chairman";
+ }
+};
+$("#continueOffline").onclick=()=>{
+ ai={...ai,provider:"local",apiKey:""};saveAI();
+ $("#liveAIOverlay").classList.add("hidden");updateAIState();
+};
 $("#pushCloud").onclick=async()=>{try{await pushCloud()}catch(e){$("#syncStatus").textContent="Backup failed: "+e.message;audit("backup_error",e.message)}};
 $("#pullCloud").onclick=async()=>{try{await pullCloud()}catch(e){$("#syncStatus").textContent="Restore failed: "+e.message;audit("restore_error",e.message)}};
 $("#lockButton").onclick=()=>{state.chairman_lock=!state.chairman_lock;audit("chairman_lock",state.chairman_lock?"activated":"deactivated");renderSettings()};
@@ -271,5 +409,5 @@ $("#showArchitecture").onclick=showArchitecture;$("#showWorkflows").onclick=show
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){const r=new SR();r.lang="en-US";r.onresult=e=>{$("#commandInput").value=e.results[0][0].transcript};$("#micButton").onclick=()=>r.start()}else{$("#micButton").disabled=true;$("#micButton").textContent="Voice unavailable"}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
-evaluateTasks();renderAll();
+evaluateTasks();renderAll();updateAIState();if(state.initialized&&!(ai.apiKey||ai.proxyUrl)&&ai.provider!=="local")$("#liveAIOverlay").classList.remove("hidden");
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
