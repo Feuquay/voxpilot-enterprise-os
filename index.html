@@ -88,13 +88,20 @@
 
   <main>
     <section id="command" class="tab active">
-      <div id="messages" class="messages"></div>
+      <div class="quick-commands" id="quickCommands">
+<button data-command="Chairman, give me the complete executive brief and controlling next action.">Executive Brief</button>
+<button data-command="Chairman, recall the complete VoxPilot architecture, enterprise, ventures, decisions, and open gates.">Deep Recall</button>
+<button data-command="Chairman, identify the single highest-value action I should take now.">Next Action</button>
+<button data-command="Chairman, audit the current runtime, risks, unknowns, and missing capabilities.">Runtime Audit</button>
+</div>
+<div id="runtimeStats" class="runtime-stats"></div>
+<div id="messages" class="messages"></div>
       <div class="composer">
         <textarea id="commandInput" placeholder="Speak directly to Chairman…"></textarea>
         <div class="row">
-          <button id="micButton">Speak</button>
+          <button id="micButton">Speak</button><button id="readLast">Read Reply</button>
           <button id="newSession">New Session</button>
-          <button id="sendButton" class="primary">Send</button>
+          <button id="stopButton" class="hidden">Stop</button><button id="sendButton" class="primary">Send</button>
         </div>
       </div>
     </section>

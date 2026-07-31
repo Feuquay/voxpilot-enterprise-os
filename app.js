@@ -25,25 +25,41 @@ const doctrine={
 };
 
 const seed=()=>({
- version:3, initialized:false, founder:{name:"Lewis Franklin Feuquay",github:""},
- created_at:now(), chairman_lock:false,
+ version:7,initialized:false,
+ founder:{name:"Lewis Franklin Feuquay",github:"Feuquay"},
+ doctrine:[
+ "VoxPilot Nexus is the central platform of the Sovereign Enterprise.",
+ "Chairman is the persistent Founder-facing executive cognition runtime inside VoxPilot Nexus, not a generic chatbot.",
+ "The runtime owns identity, continuity, doctrine, memory, decisions, approvals, permissions, enterprise state, orchestration, evidence, and audit.",
+ "Reasoning models are replaceable substrates beneath VoxPilot; the enterprise owns continuity and cognition.",
+ "Consequential external actions require explicit Founder approval and a durable audit record.",
+ "Extend the canonical VoxPilot application rather than replacing it with disconnected prototypes.",
+ "Optimize for enterprise value through revenue, margin, strategic leverage, asset value, capital efficiency, risk reduction, reduced Founder attention, and faster execution.",
+ "The iPhone is the primary Founder command interface. Local-first operation and provider independence are strategic requirements.",
+ "claw-code-main.zip is the locked Claude-derived engineering reference unless the Founder explicitly replaces it.",
+ "Claude/Claw-derived runtime capabilities include the agent loop, tool routing, permission gates, sessions, context compression, subagents, task routing, filesystem/terminal execution patterns, provider abstraction, and worker orchestration."
+ ],
  memories:[
-  {id:uid(),content:"VoxPilot Nexus is the central platform of the Sovereign Enterprise.",type:"Doctrine",scope:"enterprise",provenance:"Founder",created_at:now()},
-  {id:uid(),content:"The locked engineering reference is claw-code-main.zip unless the Founder explicitly replaces it.",type:"Constraint",scope:"VoxPilot",provenance:"Founder",created_at:now()},
-  {id:uid(),content:"The Founder operates with an iPhone and GitHub; delivery must not assume a Mac, PC, local Python, or terminal.",type:"Verified fact",scope:"delivery",provenance:"Founder",created_at:now()},
-  {id:uid(),content:"Consequential actions require explicit Founder approval and an audit record.",type:"Doctrine",scope:"governance",provenance:"Founder",created_at:now()}
+ {id:uid(),content:"VoxPilot Nexus is the central platform of the Sovereign Enterprise.",type:"doctrine",scope:"enterprise",provenance:"Locked architecture",created_at:now()},
+ {id:uid(),content:"The standalone Chairman must run locally on the Founder's iPhone by default, with optional cloud escalation rather than mandatory cloud dependence.",type:"doctrine",scope:"runtime",provenance:"Founder requirement",created_at:now()},
+ {id:uid(),content:"The Chairman Runtime must preserve enterprise continuity across sessions and across changes in model provider.",type:"doctrine",scope:"runtime",provenance:"Founder requirement",created_at:now()},
+ {id:uid(),content:"The canonical engineering anchor is claw-code-main.zip, treated as the Claude-derived foundation for standalone VoxPilot discussions unless explicitly replaced.",type:"fact",scope:"engineering",provenance:"Locked reference",created_at:now()},
+ {id:uid(),content:"Active enterprise lanes include VoxPilot Nexus, rideshare operations, Gravity Sports Syndicate, Franklin Capital Energy, WonderGate Studios, and LifeWave/MedSpa on compliance hold.",type:"fact",scope:"enterprise",provenance:"Enterprise OS",created_at:now()},
+ {id:uid(),content:"The controlling VoxPilot MVP gate requires five fields: target user, pain point, spoken command, target app/tool, and action performed.",type:"decision",scope:"voxpilot",provenance:"Q-002",created_at:now()},
+ {id:uid(),content:"The Founder wants one canonical application, not repeated disconnected ZIP demonstrations.",type:"preference",scope:"engineering",provenance:"Founder correction",created_at:now()}
  ],
  ventures:[
-  {name:"VoxPilot Nexus",status:"Active",priority:1,role:"Central sovereign enterprise platform",gate:"Operate the standalone Chairman on iPhone and GitHub"},
-  {name:"Rideshare Operations",status:"Active",priority:1,role:"Current cash engine",gate:"Verify true weekly net cash"},
-  {name:"Franklin Capital Energy",status:"Active",priority:2,role:"Advisory and project-development lane",gate:"Create monetizable proof asset"},
-  {name:"Gravity Sports Syndicate",status:"Gated",priority:3,role:"AI-native competitive sports platform",gate:"Non-wagering MVP; counsel before wagering"},
-  {name:"WonderGate Studios",status:"Planned",priority:3,role:"Cinematic and franchise production",gate:"Choose flagship property"},
-  {name:"LifeWave / MedSpa",status:"Hold",priority:4,role:"Compliance-sensitive venture",gate:"Legal and medical claims review"}
+ {id:"VOX",name:"VoxPilot Nexus",status:"active",role:"Central sovereign enterprise platform and Chairman Runtime",gate:"Complete a genuinely useful persistent standalone executive runtime and close Q-002"},
+ {id:"RIDE",name:"Rideshare Operations",status:"active",role:"Current cash-generation operation",gate:"Establish true weekly net cash after all vehicle and operating costs"},
+ {id:"GSS",name:"Gravity Sports Syndicate",status:"gated",role:"AI-native competitive sports and media platform",gate:"Non-wagering proof asset; wagering requires counsel"},
+ {id:"FCE",name:"Franklin Capital Energy",status:"available",role:"Energy development and advisory lane",gate:"Choose a monetizable proof asset"},
+ {id:"WGS",name:"WonderGate Studios",status:"available",role:"AI-native cinematic and children's media studio",gate:"Select and develop the flagship property"},
+ {id:"LWM",name:"LifeWave / MedSpa",status:"hold",role:"Health and medspa venture",gate:"Medical-claims and compliance review"}
  ],
- decisions:[], actions:[], tasks:[], sessions:[], connectorStates:{}, integrationRuns:[],
- audit:[{id:uid(),type:"runtime_created",actor:"Founder",at:now(),detail:"iPhone/GitHub Chairman runtime created"}]
-});
+ sessions:[],decisions:[],actions:[],tasks:[],
+ audit:[{id:uid(),type:"runtime_created",actor:"Founder",at:now(),detail:"VoxPilot Chairman v7 executive runtime created"}],
+ chairman_lock:true
+})
 function load(){try{const x=JSON.parse(localStorage.getItem(DB_KEY));return x||seed()}catch{return seed()}}
 function persist(){localStorage.setItem(DB_KEY,JSON.stringify(state))}
 function loadSession(key,fallback){try{return JSON.parse(sessionStorage.getItem(key))||fallback}catch{return fallback}}
@@ -60,10 +76,18 @@ function saveSync(){sessionStorage.setItem(SYNC_KEY,JSON.stringify(sync))}
 function audit(type,detail){state.audit.unshift({id:uid(),type,actor:"Founder",at:now(),detail});persist()}
 function ensureSession(){if(!currentSession){currentSession={id:uid(),title:"Executive Session",created_at:now(),messages:[]};state.sessions.unshift(currentSession);persist()}return currentSession}
 function addMessage(role,content,meta={}){ensureSession().messages.push({id:uid(),role,content,meta,at:now()});persist();renderMessages()}
-function relevantMemories(prompt,limit=12){
- const words=[...new Set(prompt.toLowerCase().match(/[a-z0-9]{4,}/g)||[])];
- return state.memories.map(m=>({m,score:words.reduce((n,w)=>n+(m.content.toLowerCase().includes(w)?1:0),0)+(m.type==="Doctrine"?0.2:0)}))
-  .sort((a,b)=>b.score-a.score).filter(x=>x.score>0).slice(0,limit).map(x=>x.m);
+function relevantMemories(prompt,limit=16){
+ const stop=new Set(["the","and","that","this","with","from","your","you","for","are","was","were","have","has","into","then","all","everything","chairman"]);
+ const terms=String(prompt).toLowerCase().match(/[a-z0-9_-]{3,}/g)||[];
+ const query=[...new Set(terms.filter(t=>!stop.has(t)))];
+ return state.memories.map((m,i)=>{
+  const text=`${m.content} ${m.type} ${m.scope||""} ${m.provenance||""}`.toLowerCase();
+  let score=0;query.forEach(t=>{if(text.includes(t))score+=text.startsWith(t)?5:2});
+  if(/recall|everything|enterprise|complete|comprehensive|deep/.test(prompt.toLowerCase()))score+=Math.max(0,10-i*.08);
+  if(String(m.type).toLowerCase()==="doctrine")score+=2.5;
+  if(String(m.type).toLowerCase()==="decision")score+=2;
+  return {...m,_score:score};
+ }).sort((a,b)=>b._score-a._score||String(b.created_at).localeCompare(String(a.created_at))).slice(0,limit);
 }
 function domainsFor(q){
  const rules=[
@@ -91,32 +115,31 @@ Open Settings and activate GitHub Models, or tap the Chairman status badge to en
  };
 }
 function systemPrompt(){
- return `You are Chairman: the persistent executive cognition runtime inside VoxPilot Nexus for Founder ${state.founder.name}.
+ return `You are Chairman, the persistent executive cognition runtime inside VoxPilot Nexus for Founder ${state.founder.name}.
 
-IDENTITY AND AUTHORITY
-- You are not a generic assistant and you do not call the Founder "Chairman."
-- The human Founder retains final authority.
-- Your continuity comes from VoxPilot doctrine, durable memory, decisions, sessions, approvals, and audit state—not from any one model provider.
-- The model is a replaceable reasoning substrate serving the persistent VoxPilot runtime.
+IDENTITY
+You are not a generic assistant. You are the Founder-facing executive layer of VoxPilot Nexus. Never address the Founder as Chairman. The Founder retains final authority.
 
-OPERATING OBJECTIVE
-${doctrine.optimization}
+RUNTIME DOCTRINE
+${state.doctrine.map(x=>`- ${x}`).join("\n")}
 
-BEHAVIOR
-- Respond directly to the Founder's actual command.
-- Converse naturally. Do not force repetitive headings, boilerplate governance language, or canned "synthesis" templates.
-- Recall and integrate relevant Founder memory, enterprise architecture, ventures, prior decisions, and recent conversation.
-- Distinguish verified facts, Founder-stated targets, inference, and unknowns when that distinction materially matters.
-- Challenge weak assumptions clearly, but remain inside the Founder-defined VoxPilot framework unless asked to compare alternatives.
-- Preserve dissent from specialist domains when useful.
-- Never claim that an external action, connector, code merge, model, or file exists unless the supplied runtime context supports it.
-- Consequential external execution requires Founder approval.
-- When asked who you are, introduce yourself as the Chairman Runtime inside VoxPilot Nexus and explain your role in substantive, human language.
-- Optimize for high information density and decisive next actions, not generic advice.
+OPERATING METHOD
+1. Determine the Founder's actual objective.
+2. Retrieve relevant doctrine, durable memories, venture state, decisions, approvals, tasks, audit evidence, and recent dialogue.
+3. Distinguish verified fact, Founder-stated target, inference, and unknown only when material.
+4. Synthesize a direct executive response.
+5. Name the controlling next action when action is appropriate.
+6. Never claim that an external action, connector, code merge, deployment, model, or file exists without supplied evidence.
+7. Never substitute repetitive boilerplate, canned governance text, or generic advice for actual reasoning.
+8. Preserve continuity and correct prior errors rather than restarting the project.
+9. Be decisive and specific; go deeply when the Founder asks for comprehensive recall.
+10. Consequential execution requires Founder approval and audit.
 
-The Founder expects deep continuity and executive-level reasoning.`;
+CURRENT OPTIMIZATION
+Increase enterprise value through revenue, margin, strategic leverage, asset value, capital efficiency, risk reduction, reduced Founder attention, or faster execution.
+
+When the Founder says "recall everything," produce an integrated operational reconstruction, not a vague philosophy summary.`;
 }
-
 function webGPUSupported(){return Boolean(navigator.gpu)}
 function setModelProgress(progress,text){
  const bar=$("#modelProgress");if(bar)bar.style.width=`${Math.max(0,Math.min(100,progress*100))}%`;
@@ -143,44 +166,70 @@ async function ensureLocalModel(modelId=ai.model){
  try{return await localEngineLoading}
  finally{localEngineLoading=null}
 }
-async function onDeviceCompletion(prompt){
- const engine=await ensureLocalModel(ai.model);
- const session=ensureSession();
- const memory=relevantMemories(prompt,24);
- const transcript=session.messages.filter(m=>!m.meta?.pending).slice(-16).map(m=>({
-  role:m.role==="assistant"?"assistant":"user",content:m.content
- }));
- const context=`FOUNDER CONTEXT
 
-Relevant durable memory:
-${memory.length?memory.map(m=>`- [${m.type}] ${m.content}`).join("\n"):"- No directly matching durable memory."}
+function classifyFounderCommand(prompt){
+ let m;if((m=prompt.trim().match(/^remember(?: that)?\s+(.+)/i)))return {kind:"memory",content:m[1]};
+ if((m=prompt.trim().match(/^decision\s*:\s*(.+?)(?:\s*[-—:]\s*(.+))?$/i)))return {kind:"decision",title:m[1],content:m[2]||m[1]};
+ if((m=prompt.trim().match(/^task\s*:\s*(.+)/i)))return {kind:"task",content:m[1]};
+ return null;
+}
+function captureFounderCommand(prompt){
+ const c=classifyFounderCommand(prompt);if(!c)return null;
+ if(c.kind==="memory"){state.memories.unshift({id:uid(),content:c.content,type:"fact",scope:"enterprise",provenance:"Founder command",created_at:now()});audit("memory_created",c.content);return "Stored as durable Founder memory."}
+ if(c.kind==="decision"){state.decisions.unshift({id:uid(),title:c.title,text:c.content,created_at:now(),authority:"Founder"});state.memories.unshift({id:uid(),content:`Founder decision: ${c.content}`,type:"decision",scope:"enterprise",provenance:"Founder command",created_at:now()});audit("decision_recorded",c.title);return "Recorded as a Founder decision."}
+ if(c.kind==="task"){state.tasks.unshift({id:uid(),title:c.content,due_at:null,kind:"founder",status:"pending",created_at:now()});audit("task_created",c.content);return "Added to the Chairman task register."}
+}
+function completeRuntimeContext(prompt){
+ const memory=relevantMemories(prompt,32);
+ return `COMPLETE VOXPILOT RUNTIME CONTEXT
 
-Enterprise portfolio:
-${state.ventures.map(v=>`- ${v.name}: ${v.status}; controlling gate: ${v.gate}`).join("\n")}
+FOUNDER
+- ${state.founder.name}
+- Final authority remains with the Founder.
 
-Founder decisions:
-${state.decisions.slice(0,15).map(d=>`- ${d.title}: ${d.text}`).join("\n")||"- No recorded decisions."}
+LOCKED DOCTRINE
+${state.doctrine.map(x=>`- ${x}`).join("\n")}
 
-Current command:
+RELEVANT DURABLE MEMORY
+${memory.length?memory.map(m=>`- [${m.type}/${m.scope||"enterprise"}] ${m.content} (source: ${m.provenance||"runtime"})`).join("\n"):"- No matching durable memory."}
+
+ENTERPRISE PORTFOLIO
+${state.ventures.map(v=>`- ${v.name} [${v.status}]: ${v.role}. Controlling gate: ${v.gate}`).join("\n")}
+
+FOUNDER DECISIONS
+${state.decisions.slice(0,25).map(d=>`- ${d.title}: ${d.text}`).join("\n")||"- No additional recorded decisions."}
+
+ACTION REGISTER
+${state.actions.slice(0,20).map(a=>`- ${a.title}: status=${a.status}; risk=${a.risk}; rationale=${a.rationale}`).join("\n")||"- No action proposals."}
+
+TASK REGISTER
+${state.tasks.slice(0,20).map(t=>`- ${t.title}: status=${t.status}${t.due_at?`; due=${t.due_at}`:""}`).join("\n")||"- No tasks."}
+
+RECENT AUDIT
+${state.audit.slice(0,12).map(a=>`- ${a.type}: ${a.detail}`).join("\n")||"- No audit events."}
+
+CURRENT COMMAND
 ${prompt}`;
- const messages=[
-  {role:"system",content:systemPrompt()},
-  ...transcript.slice(0,-1),
-  {role:"user",content:context}
- ];
- const reply=await engine.chat.completions.create({
-  messages,
-  temperature:.35,
-  max_tokens:1200
- });
- return {
-  text:reply.choices?.[0]?.message?.content||"The on-device model returned no response.",
-  confidence:.78,
-  domains:[`On-device · ${ai.model}`],
-  ondevice:true
- };
+}
+function compactSessionIfNeeded(){
+ const s=ensureSession();if(s.messages.length<=34)return;
+ const old=s.messages.slice(0,-22),summary=old.map(m=>`${m.role}: ${m.content}`).join("\n").slice(0,7000);
+ state.memories.unshift({id:uid(),content:`Session continuity summary:\n${summary}`,type:"session_summary",scope:"runtime",provenance:"Automatic context compression",created_at:now()});
+ s.messages=s.messages.slice(-22);audit("context_compressed",`${old.length} messages compressed into durable continuity`);
 }
 
+async function onDeviceCompletion(prompt,onToken=null){
+ const engine=await ensureLocalModel(ai.model),session=ensureSession();
+ const transcript=session.messages.filter(m=>!m.meta?.pending).slice(-20).map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.content}));
+ const messages=[{role:"system",content:systemPrompt()},...transcript.slice(0,-1),{role:"user",content:completeRuntimeContext(prompt)}];
+ if(onToken){
+  const stream=await engine.chat.completions.create({messages,temperature:.32,max_tokens:1500,stream:true});
+  let text="";for await(const chunk of stream){if(window.__chairmanAbort)break;const d=chunk.choices?.[0]?.delta?.content||"";text+=d;if(d)onToken(text)}
+  return {text:text||"The on-device model returned no response.",confidence:.8,domains:[`On-device · ${ai.model}`],ondevice:true};
+ }
+ const reply=await engine.chat.completions.create({messages,temperature:.32,max_tokens:1500});
+ return {text:reply.choices?.[0]?.message?.content||"The on-device model returned no response.",confidence:.8,domains:[`On-device · ${ai.model}`],ondevice:true};
+}
 async function providerCall(prompt){
  if(ai.provider==="ondevice")return onDeviceCompletion(prompt);
  if(ai.provider==="local")return localEngine(prompt);
@@ -280,28 +329,18 @@ ${prompt}`;
 }
 async function execute(){
  const box=$("#commandInput"),prompt=box.value.trim();if(!prompt)return;
- box.value="";addMessage("user",prompt);
- const pending={id:uid(),role:"assistant",content:"Chairman is reasoning…",meta:{pending:true},at:now()};
+ box.value="";window.__chairmanAbort=false;const captured=captureFounderCommand(prompt);addMessage("user",prompt);
+ const pending={id:uid(),role:"assistant",content:captured?`${captured}\n\nChairman is integrating this into the runtime…`:"Chairman is reasoning…",meta:{pending:true},at:now()};
  ensureSession().messages.push(pending);persist();renderMessages();
+ $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");
  try{
-  const out=await providerCall(prompt);
-  pending.content=out.text;
-  pending.meta={confidence:out.confidence,domains:out.domains,diagnostic:out.diagnostic};
-  audit("executive_response",`${ai.provider}; confidence ${out.confidence}`);
- }catch(e){
-  if(e.message==="LIVE_AI_NOT_CONFIGURED"){
-   pending.content="Live Chairman requires activation. Enter your GitHub Models token once for this browser session.";
-   pending.meta={error:true};
-   $("#liveAIOverlay").classList.remove("hidden");
-  }else{
-   pending.content=`Chairman connection error: ${e.message}`;
-   pending.meta={error:true};
-  }
-  audit("provider_error",e.message);
- }
- persist();renderMessages();updateAIState();
+  const out=ai.provider==="ondevice"?await onDeviceCompletion(prompt,text=>{pending.content=text;renderMessages(false)}):await providerCall(prompt);
+  pending.content=out.text;pending.meta={confidence:out.confidence,domains:out.domains,diagnostic:out.diagnostic};audit("executive_response",`${ai.provider}; confidence ${out.confidence}`);
+ }catch(e){pending.content=`Chairman runtime error: ${e.message}`;pending.meta={error:true};audit("provider_error",e.message)}
+ finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden")}
+ compactSessionIfNeeded();persist();renderMessages();renderBrief();renderMemories();renderDecisions();renderTasks();updateAIState();
 }
-function renderMessages(){
+function renderMessages(scroll=true){
  const rows=currentSession?.messages||[];
  $("#messages").innerHTML=rows.length?rows.map(x=>`<div class="message ${x.role}${x.meta?.pending?" typing":""}">${esc(x.content)}${x.meta?.confidence?`<div class="meta">Confidence ${Math.round(x.meta.confidence*100)}% · ${(x.meta.domains||[]).join(", ")}</div>`:""}</div>`).join(""):`<div class="message assistant">Chairman Runtime ready.
 
@@ -421,8 +460,15 @@ async function gh(url,opt={}){const c=syncForm(),r=await fetch(url,{...opt,heade
 function contentURL(c){return `https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${c.path.split("/").map(encodeURIComponent).join("/")}`}
 async function pushCloud(){const c=syncForm();$("#syncStatus").textContent="Encrypting on iPhone…";const enc=await encryptRuntime(c.passphrase),url=contentURL(c);let sha;try{sha=(await gh(url)).sha}catch(e){if(!/Not Found|404/.test(e.message))throw e}const body={message:`Chairman encrypted checkpoint ${now()}`,content:bytes64(new TextEncoder().encode(enc)),branch:"main"};if(sha)body.sha=sha;await gh(url,{method:"PUT",body:JSON.stringify(body)});$("#syncStatus").textContent=`Encrypted backup completed ${new Date().toLocaleString()}.`;audit("encrypted_backup",c.path)}
 async function pullCloud(){const c=syncForm(),d=await gh(contentURL(c)),raw=new TextDecoder().decode(from64(d.content)),restored=await decryptRuntime(raw,c.passphrase);if(!confirm("Replace this iPhone's Chairman runtime with the encrypted GitHub backup?"))return;state=restored;persist();currentSession=null;renderAll();$("#syncStatus").textContent=`Runtime restored ${new Date().toLocaleString()}.`;audit("encrypted_restore",c.path)}
+function renderRuntimeStats(){
+ const el=$("#runtimeStats");if(!el)return;const s=ensureSession();
+ el.innerHTML=`<span>${state.memories.length} memories</span><span>${state.decisions.length} decisions</span><span>${state.tasks.filter(t=>t.status!=="completed").length} open tasks</span><span>${s.messages.length} session messages</span>`;
+}
 function renderAll(){renderMessages();renderBrief();renderActions();renderIntegrations();renderMemories();renderVentures();renderTasks();renderDecisions();renderSettings()}
 $$("nav button").forEach(b=>b.onclick=()=>{$$("nav button").forEach(x=>x.classList.remove("active"));$$(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("#"+b.dataset.tab).classList.add("active");renderAll()});
+$("#quickCommands").onclick=e=>{const b=e.target.closest("[data-command]");if(!b)return;$("#commandInput").value=b.dataset.command;execute()};
+$("#stopButton").onclick=()=>{window.__chairmanAbort=true;$("#stopButton").classList.add("hidden");$("#sendButton").disabled=false};
+$("#readLast").onclick=()=>{const s=ensureSession(),last=[...s.messages].reverse().find(m=>m.role==="assistant"&&!m.meta?.pending);if(!last||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(last.content);u.rate=.96;speechSynthesis.speak(u)};
 $("#sendButton").onclick=execute;$("#commandInput").onkeydown=e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))execute()};
 $("#newSession").onclick=()=>{currentSession=null;renderMessages();audit("new_session","Founder opened a new executive session")};
 $("#saveMemory").onclick=()=>{const c=$("#memoryInput").value.trim();if(!c)return;state.memories.unshift({id:uid(),content:c,type:$("#memoryType").value,scope:"enterprise",provenance:"Founder",created_at:now()});$("#memoryInput").value="";audit("memory_created",c);renderMemories();renderBrief()};
@@ -498,5 +544,7 @@ $("#showArchitecture").onclick=showArchitecture;$("#showWorkflows").onclick=show
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){const r=new SR();r.lang="en-US";r.onresult=e=>{$("#commandInput").value=e.results[0][0].transcript};$("#micButton").onclick=()=>r.start()}else{$("#micButton").disabled=true;$("#micButton").textContent="Voice unavailable"}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
-evaluateTasks();renderAll();updateAIState();if(state.initialized&&((ai.provider==="ondevice"&&!localEngineInstance)||(ai.provider!=="local"&&ai.provider!=="ondevice"&&!(ai.apiKey||ai.proxyUrl))))$("#liveAIOverlay").classList.remove("hidden");
+evaluateTasks();renderAll();updateAIState();
+if(state.initialized&&ai.provider==="ondevice"){setTimeout(async()=>{try{await ensureLocalModel(ai.model);updateAIState();$("#liveAIOverlay").classList.add("hidden")}catch(e){$("#liveAIOverlay").classList.remove("hidden")}},250)}
+else if(state.initialized&&ai.provider!=="local"&&!(ai.apiKey||ai.proxyUrl))$("#liveAIOverlay").classList.remove("hidden");
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
