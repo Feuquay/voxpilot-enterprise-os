@@ -29,17 +29,38 @@
 <div id="liveAIOverlay" class="overlay hidden">
   <div class="setup-card">
     <div class="eyebrow">VOXPILOT NEXUS</div>
-    <h1>Activate Live Chairman</h1>
-    <p>The deterministic fallback has been disabled as a substitute for intelligence. Activate GitHub Models so Chairman can reason conversationally using your persistent Founder context.</p>
-    <label>GitHub Models token
-      <input id="liveToken" type="password" placeholder="Fine-grained token with Models: read">
-    </label>
-    <label>Model
-      <input id="liveModel" value="openai/gpt-4.1">
-    </label>
-    <button id="activateLiveAI" class="primary full">Activate and Test Chairman</button>
-    <button id="continueOffline" class="full">Continue in Offline Diagnostic Mode</button>
-    <div id="activationStatus" class="notice">The token is stored only in this browser session and is never committed to GitHub.</div>
+    <h1>Activate Chairman Intelligence</h1>
+    <p>Choose the Chairman reasoning substrate. The VoxPilot identity, doctrine, memory, approvals, ventures, decisions, and audit remain persistent regardless of which model reasons beneath them.</p>
+
+    <div class="activation-choice">
+      <h3>On-Device Chairman — Standalone</h3>
+      <p>Downloads an open model once, then runs inference directly on this iPhone through Safari WebGPU. No AI token is required after the model is cached.</p>
+      <label>Local model
+        <select id="localModel">
+          <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 2.5 0.5B — fastest, approximately 700 MB</option>
+          <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B — stronger, approximately 900 MB</option>
+          <option value="SmolLM2-1.7B-Instruct-q4f16_1-MLC">SmolLM2 1.7B — stronger, approximately 1.8 GB</option>
+        </select>
+      </label>
+      <button id="activateLocalAI" class="primary full">Download and Activate On-Device Chairman</button>
+      <div id="localActivationStatus" class="notice">Keep Safari open during the first download. Later sessions reuse the browser-cached model.</div>
+      <div class="progress-track"><div id="modelProgress" class="progress-fill"></div></div>
+    </div>
+
+    <div class="activation-choice">
+      <h3>Cloud Escalation — Optional</h3>
+      <p>Uses GitHub Models for stronger reasoning when authorized. This is optional and does not own Chairman continuity.</p>
+      <label>GitHub Models token
+        <input id="liveToken" type="password" placeholder="Fine-grained token with Models: read">
+      </label>
+      <label>Cloud model
+        <input id="liveModel" value="openai/gpt-4.1">
+      </label>
+      <button id="activateLiveAI" class="full">Activate Cloud Chairman</button>
+      <div id="activationStatus" class="notice">The token is stored only in this browser session and is never committed to GitHub.</div>
+    </div>
+
+    <button id="continueOffline" class="full">Continue Without a Language Model</button>
   </div>
 </div>
 
@@ -159,13 +180,14 @@
       <h2>Runtime Settings</h2>
       <label>AI provider
         <select id="provider">
-          <option value="github">GitHub Models — Live Chairman</option>
-          <option value="local">Offline Diagnostic — Not Live AI</option>
+          <option value="ondevice">On-Device Chairman — Standalone AI</option>
+          <option value="github">GitHub Models — Cloud Escalation</option>
+          <option value="local">No Model — Runtime Diagnostic</option>
           <option value="openai">OpenAI API</option>
           <option value="anthropic">Anthropic API</option>
         </select>
       </label>
-      <label>Model<input id="model" placeholder="openai/gpt-4.1"></label>
+      <label>Model<input id="model" placeholder="Qwen2.5-0.5B-Instruct-q4f16_1-MLC"></label>
       <label>AI token or API key<input id="apiKey" type="password" placeholder="Stored only in this browser session"></label>
       <label>Optional secure proxy URL<input id="proxyUrl" placeholder="Optional"></label>
       <div class="row"><button id="testAI">Test Connection</button><button id="saveSettings" class="primary">Save AI Settings</button></div>

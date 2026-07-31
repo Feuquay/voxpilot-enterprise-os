@@ -48,9 +48,13 @@ function load(){try{const x=JSON.parse(localStorage.getItem(DB_KEY));return x||s
 function persist(){localStorage.setItem(DB_KEY,JSON.stringify(state))}
 function loadSession(key,fallback){try{return JSON.parse(sessionStorage.getItem(key))||fallback}catch{return fallback}}
 let state=load();
-let ai=loadSession(SESSION_KEY,{provider:"github",model:"openai/gpt-4.1",apiKey:"",proxyUrl:""});
+let ai=loadSession(SESSION_KEY,{provider:"ondevice",model:"Qwen2.5-0.5B-Instruct-q4f16_1-MLC",apiKey:"",proxyUrl:""});
 let sync=loadSession(SYNC_KEY,{owner:"",repo:"voxpilot-chairman",token:"",passphrase:"",path:"private/chairman-runtime.enc.json"});
 let currentSession=null;
+let localEngineInstance=null;
+let localEngineModel=null;
+let localEngineLoading=null;
+const WEBLLM_CDN="https://esm.run/@mlc-ai/web-llm";
 function saveAI(){sessionStorage.setItem(SESSION_KEY,JSON.stringify(ai))}
 function saveSync(){sessionStorage.setItem(SYNC_KEY,JSON.stringify(sync))}
 function audit(type,detail){state.audit.unshift({id:uid(),type,actor:"Founder",at:now(),detail});persist()}
@@ -112,7 +116,73 @@ BEHAVIOR
 
 The Founder expects deep continuity and executive-level reasoning.`;
 }
+
+function webGPUSupported(){return Boolean(navigator.gpu)}
+function setModelProgress(progress,text){
+ const bar=$("#modelProgress");if(bar)bar.style.width=`${Math.max(0,Math.min(100,progress*100))}%`;
+ const status=$("#localActivationStatus");if(status&&text)status.textContent=text;
+}
+async function ensureLocalModel(modelId=ai.model){
+ if(localEngineInstance&&localEngineModel===modelId)return localEngineInstance;
+ if(localEngineLoading)return localEngineLoading;
+ if(!webGPUSupported())throw new Error("WebGPU is unavailable. Update the iPhone to iOS 26 or later and open the app in Safari.");
+ localEngineLoading=(async()=>{
+  setModelProgress(.01,"Loading the on-device AI runtime…");
+  const webllm=await import(WEBLLM_CDN);
+  const selected=modelId||"Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
+  localEngineInstance=await webllm.CreateMLCEngine(selected,{
+   initProgressCallback:p=>{
+    const raw=typeof p.progress==="number"?p.progress:0;
+    setModelProgress(raw,p.text||`Preparing ${selected}…`);
+   }
+  });
+  localEngineModel=selected;
+  setModelProgress(1,`${selected} is active on this iPhone.`);
+  return localEngineInstance;
+ })();
+ try{return await localEngineLoading}
+ finally{localEngineLoading=null}
+}
+async function onDeviceCompletion(prompt){
+ const engine=await ensureLocalModel(ai.model);
+ const session=ensureSession();
+ const memory=relevantMemories(prompt,24);
+ const transcript=session.messages.filter(m=>!m.meta?.pending).slice(-16).map(m=>({
+  role:m.role==="assistant"?"assistant":"user",content:m.content
+ }));
+ const context=`FOUNDER CONTEXT
+
+Relevant durable memory:
+${memory.length?memory.map(m=>`- [${m.type}] ${m.content}`).join("\n"):"- No directly matching durable memory."}
+
+Enterprise portfolio:
+${state.ventures.map(v=>`- ${v.name}: ${v.status}; controlling gate: ${v.gate}`).join("\n")}
+
+Founder decisions:
+${state.decisions.slice(0,15).map(d=>`- ${d.title}: ${d.text}`).join("\n")||"- No recorded decisions."}
+
+Current command:
+${prompt}`;
+ const messages=[
+  {role:"system",content:systemPrompt()},
+  ...transcript.slice(0,-1),
+  {role:"user",content:context}
+ ];
+ const reply=await engine.chat.completions.create({
+  messages,
+  temperature:.35,
+  max_tokens:1200
+ });
+ return {
+  text:reply.choices?.[0]?.message?.content||"The on-device model returned no response.",
+  confidence:.78,
+  domains:[`On-device · ${ai.model}`],
+  ondevice:true
+ };
+}
+
 async function providerCall(prompt){
+ if(ai.provider==="ondevice")return onDeviceCompletion(prompt);
  if(ai.provider==="local")return localEngine(prompt);
  if(!ai.apiKey&&!ai.proxyUrl)throw new Error("LIVE_AI_NOT_CONFIGURED");
 
@@ -311,15 +381,17 @@ function showWorkflows(){
 
 
 function updateAIState(){
- const live=ai.provider!=="local"&&Boolean(ai.apiKey||ai.proxyUrl);
+ const ondevice=ai.provider==="ondevice";
+ const cloud=ai.provider!=="local"&&!ondevice&&Boolean(ai.apiKey||ai.proxyUrl);
+ const live=ondevice||cloud;
  const badge=$("#aiState");
  if(badge){
-  badge.className=`ai-state ${live?"live":"offline"}`;
-  badge.textContent=live?`Live · ${ai.provider}`:"Offline diagnostic";
-  badge.onclick=()=>{if(!live)$("#liveAIOverlay").classList.remove("hidden")};
+  badge.className=`ai-state ${ondevice?"ondevice":cloud?"live":"offline"}`;
+  badge.textContent=ondevice?(localEngineInstance?`On-device · ${ai.model}`:"On-device · model not loaded"):cloud?`Cloud · ${ai.provider}`:"No model";
+  badge.onclick=()=>{if(!live||ondevice&&!localEngineInstance)$("#liveAIOverlay").classList.remove("hidden")};
  }
  $("#statusLine").textContent=state.chairman_lock
-  ?`Chairman Lock active · ${live?"Live intelligence":"Offline diagnostic"}`
+  ?`Chairman Lock active · ${ondevice?"standalone AI":cloud?"cloud intelligence":"no model"}`
   :`${state.founder.name} · Founder authority`;
 }
 async function testAIConnection(token=null,model=null){
@@ -361,7 +433,7 @@ $("#saveTask").onclick=()=>{const title=$("#taskTitle").value.trim(),due=$("#tas
 $("#saveSettings").onclick=()=>{
  ai={provider:$("#provider").value,model:$("#model").value.trim(),apiKey:$("#apiKey").value.trim(),proxyUrl:$("#proxyUrl").value.trim()};
  saveAI();audit("ai_settings",ai.provider);updateAIState();
- alert(ai.provider==="local"?"Offline diagnostic mode selected.":"Live Chairman settings saved for this browser session.");
+ alert(ai.provider==="ondevice"?"On-device mode selected. Load the model from the activation screen if it is not already cached.":ai.provider==="local"?"No-model diagnostic mode selected.":"Cloud Chairman settings saved for this browser session.");
 };
 $("#testAI").onclick=async()=>{
  $("#testAI").disabled=true;$("#testAI").textContent="Testing…";
@@ -370,6 +442,23 @@ $("#testAI").onclick=async()=>{
   await testAIConnection();saveAI();updateAIState();alert("Live Chairman connection verified.");
  }catch(e){alert("Connection failed: "+e.message)}
  finally{$("#testAI").disabled=false;$("#testAI").textContent="Test Connection"}
+};
+$("#activateLocalAI").onclick=async()=>{
+ const model=$("#localModel").value;
+ $("#activateLocalAI").disabled=true;$("#activateLocalAI").textContent="Loading On-Device Chairman…";
+ try{
+  ai={provider:"ondevice",model,apiKey:"",proxyUrl:""};saveAI();
+  await ensureLocalModel(model);
+  $("#provider").value="ondevice";$("#model").value=model;$("#apiKey").value="";
+  $("#liveAIOverlay").classList.add("hidden");updateAIState();
+  audit("ondevice_ai_activated",model);
+  addMessage("assistant","I am active on this iPhone. I am the persistent Chairman Runtime inside VoxPilot Nexus. My language model is now running locally beneath the VoxPilot memory, doctrine, decisions, approvals, and enterprise state.",{confidence:.82,domains:[`On-device · ${model}`]});
+ }catch(e){
+  $("#localActivationStatus").textContent="Activation failed: "+e.message;
+  audit("ondevice_activation_error",e.message);
+ }finally{
+  $("#activateLocalAI").disabled=false;$("#activateLocalAI").textContent="Download and Activate On-Device Chairman";
+ }
 };
 $("#activateLiveAI").onclick=async()=>{
  const token=$("#liveToken").value.trim(),model=$("#liveModel").value.trim()||"openai/gpt-4.1";
@@ -409,5 +498,5 @@ $("#showArchitecture").onclick=showArchitecture;$("#showWorkflows").onclick=show
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){const r=new SR();r.lang="en-US";r.onresult=e=>{$("#commandInput").value=e.results[0][0].transcript};$("#micButton").onclick=()=>r.start()}else{$("#micButton").disabled=true;$("#micButton").textContent="Voice unavailable"}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
-evaluateTasks();renderAll();updateAIState();if(state.initialized&&!(ai.apiKey||ai.proxyUrl)&&ai.provider!=="local")$("#liveAIOverlay").classList.remove("hidden");
+evaluateTasks();renderAll();updateAIState();if(state.initialized&&((ai.provider==="ondevice"&&!localEngineInstance)||(ai.provider!=="local"&&ai.provider!=="ondevice"&&!(ai.apiKey||ai.proxyUrl))))$("#liveAIOverlay").classList.remove("hidden");
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
