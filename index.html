@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v9</title>
+  <title>VoxPilot Chairman v10</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -90,6 +90,13 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   border-bottom:1px solid #000;
 }
 
+
+.quick-commands{display:grid!important;grid-template-columns:1fr 1fr!important;overflow:visible!important}
+.quick-commands button{white-space:normal!important;min-height:58px}
+@media(max-width:430px){
+ .composer .row{display:grid!important;grid-template-columns:1fr 1fr!important}
+ .composer .row button{width:100%!important;min-width:0!important}
+}
 </style>
 </head>
 <body>
@@ -100,7 +107,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
     <p>This installation runs on this iPhone and can use GitHub for deployment, live AI, and encrypted continuity.</p>
     <label>Founder name<input id="setupFounder" value="Lewis Franklin Feuquay"></label>
     <label>GitHub username<input id="setupGithub" placeholder="Your GitHub username"></label>
-    <label>Chairman repository<input id="setupRepo" value="voxpilot-chairman"></label>
+    <label>Chairman repository<input id="setupRepo" value="voxpilot-enterprise-os"></label>
     <button id="finishSetup" class="primary full">Initialize Runtime</button>
   </div>
 </div>
@@ -146,7 +153,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v9 · SINGLE-FILE AUTHORITATIVE RUNTIME
+  VOXPILOT CHAIRMAN v10 · AUTO-RESTORING STANDALONE RUNTIME
 </div>
 
   <header>
@@ -185,7 +192,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <div class="row">
           <button id="micButton">Speak</button><button id="readLast">Read Reply</button>
           <button id="newSession">New Session</button>
-          <button id="stopButton" class="hidden">Stop</button><button id="sendButton" class="primary">Send</button>
+          <button id="stopButton" class="hidden" style="display:none">Stop</button><button id="sendButton" class="primary">Send</button>
         </div>
       </div>
     </section>
@@ -285,7 +292,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
       <h2>Encrypted GitHub Continuity</h2>
       <label>GitHub username<input id="githubOwner"></label>
-      <label>Private repository<input id="githubRepo" value="voxpilot-chairman"></label>
+      <label>Private repository<input id="githubRepo" value="voxpilot-enterprise-os"></label>
       <label>Fine-grained GitHub token<input id="githubToken" type="password"></label>
       <label>Encryption passphrase<input id="syncPassphrase" type="password"></label>
       <label>Encrypted backup path<input id="syncPath" value="private/chairman-runtime.enc.json"></label>
@@ -305,7 +312,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="9.0.0-single-file";
+window.VOXPILOT_BUILD="10.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -374,7 +381,10 @@ function mergeUniqueByContent(target,source){
 }
 function migrateState(s){
  const baseline=seed();
- s.version=8;
+ s.version=10;
+ if(s.founder?.name||s.sessions?.length||s.memories?.length||s.decisions?.length||s.audit?.length){
+   s.initialized=true;
+ }
  s.doctrine=s.doctrine||[];
  baseline.doctrine.forEach(x=>{if(!s.doctrine.includes(x))s.doctrine.push(x)});
  s.memories=s.memories||[];mergeUniqueByContent(s.memories,baseline.memories);
@@ -774,7 +784,7 @@ async function execute(){
  box.value="";window.__chairmanAbort=false;const captured=captureFounderCommand(prompt);addMessage("user",prompt);
  const pending={id:uid(),role:"assistant",content:captured?`${captured}\n\nChairman is integrating this into the runtime…`:"Chairman is reasoning…",meta:{pending:true},at:now()};
  ensureSession().messages.push(pending);persist();renderMessages();
- $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");
+ $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");$("#stopButton").style.display="inline-flex";
  try{
   const out=isDeepRecallRequest(prompt)
    ?executiveRecallSynthesis(prompt)
@@ -783,7 +793,7 @@ async function execute(){
      :await providerCall(prompt);
   pending.content=out.text;pending.meta={confidence:out.confidence,domains:out.domains,diagnostic:out.diagnostic};audit("executive_response",`${ai.provider}; confidence ${out.confidence}`);
  }catch(e){pending.content=`Chairman runtime error: ${e.message}`;pending.meta={error:true};audit("provider_error",e.message)}
- finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden")}
+ finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none"}
  compactSessionIfNeeded();persist();renderMessages();renderBrief();renderMemories();renderDecisions();renderTasks();updateAIState();
 }
 function renderMessages(scroll=true){
@@ -912,8 +922,16 @@ function renderRuntimeStats(){
 }
 function renderAll(){renderMessages();renderBrief();renderActions();renderIntegrations();renderMemories();renderVentures();renderTasks();renderDecisions();renderSettings()}
 $$("nav button").forEach(b=>b.onclick=()=>{$$("nav button").forEach(x=>x.classList.remove("active"));$$(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("#"+b.dataset.tab).classList.add("active");renderAll()});
+const deepRecallButton=[...document.querySelectorAll("[data-command]")].find(b=>b.textContent.includes("Authoritative Deep Recall"));
+if(deepRecallButton){
+ deepRecallButton.onclick=e=>{
+   e.preventDefault();
+   $("#commandInput").value="Chairman, recall everything comprehensively and deeply.";
+   execute();
+ };
+}
 $("#quickCommands").onclick=e=>{const b=e.target.closest("[data-command]");if(!b)return;$("#commandInput").value=b.dataset.command;execute()};
-$("#stopButton").onclick=()=>{window.__chairmanAbort=true;$("#stopButton").classList.add("hidden");$("#sendButton").disabled=false};
+$("#stopButton").onclick=()=>{window.__chairmanAbort=true;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none";$("#sendButton").disabled=false};
 $("#readLast").onclick=()=>{const s=ensureSession(),last=[...s.messages].reverse().find(m=>m.role==="assistant"&&!m.meta?.pending);if(!last||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(last.content);u.rate=.96;speechSynthesis.speak(u)};
 $("#sendButton").onclick=execute;$("#commandInput").onkeydown=e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))execute()};
 $("#newSession").onclick=()=>{currentSession=null;renderMessages();audit("new_session","Founder opened a new executive session")};
@@ -980,7 +998,34 @@ $("#lockButton").onclick=()=>{state.chairman_lock=!state.chairman_lock;audit("ch
 $("#exportData").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`voxpilot-chairman-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);audit("data_export","Local JSON export")};
 $("#importData").onchange=async e=>{try{const x=JSON.parse(await e.target.files[0].text());if(!x.memories||!x.ventures)throw new Error("Invalid Chairman data.");state=x;persist();currentSession=null;renderAll();alert("Chairman data imported.")}catch(err){alert(err.message)}};
 $("#clearData").onclick=()=>{if(confirm("Erase all Chairman data from this iPhone?")){state=seed();persist();currentSession=null;location.reload()}};
-$("#finishSetup").onclick=()=>{state.founder.name=$("#setupFounder").value.trim()||"Founder";state.founder.github=$("#setupGithub").value.trim();sync.owner=state.founder.github;sync.repo=$("#setupRepo").value.trim()||"voxpilot-chairman";state.initialized=true;saveSync();audit("runtime_initialized",`${state.founder.name}; GitHub ${state.founder.github}`);$("#setupOverlay").classList.add("hidden");renderAll()};
+$("#finishSetup").onclick=()=>{
+ state.founder.name=$("#setupFounder").value.trim()||"Lewis Franklin Feuquay";
+ state.founder.github=$("#setupGithub").value.trim()||"Feuquay";
+ sync.owner=state.founder.github;
+ sync.repo=$("#setupRepo").value.trim()||"voxpilot-enterprise-os";
+ state.initialized=true;
+ saveSync();
+ audit("runtime_initialized",`${state.founder.name}; GitHub ${state.founder.github}/${sync.repo}`);
+ $("#setupOverlay").classList.add("hidden");
+ renderAll();updateAIState();
+
+ if(ai.provider!=="ondevice"){
+   ai={provider:"ondevice",model:"Qwen2.5-0.5B-Instruct-q4f16_1-MLC",apiKey:"",proxyUrl:""};
+   saveAI();
+ }
+ setTimeout(async()=>{
+   try{
+     await ensureLocalModel(ai.model);
+     $("#liveAIOverlay").classList.add("hidden");
+     updateAIState();
+     addMessage("assistant","Chairman Runtime initialized. The local model and persistent enterprise continuity are active.",{confidence:.94,domains:["VoxPilot Runtime","On-device AI"]});
+   }catch(e){
+     $("#liveAIOverlay").classList.remove("hidden");
+     const status=$("#localActivationStatus");
+     if(status)status.textContent="Tap Download and Activate On-Device Chairman once. Authoritative Deep Recall already works while the model restores.";
+   }
+ },300);
+};
 
 const categories=[...new Set(integrationCatalog.connectors.map(c=>c.category))].sort();
 categories.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;$("#integrationCategory").appendChild(o)});
@@ -991,8 +1036,24 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){const r
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
 evaluateTasks();renderAll();updateAIState();
-if(state.initialized&&ai.provider==="ondevice"){setTimeout(async()=>{try{await ensureLocalModel(ai.model);updateAIState();$("#liveAIOverlay").classList.add("hidden")}catch(e){$("#liveAIOverlay").classList.remove("hidden")}},250)}
-else if(state.initialized&&ai.provider!=="local"&&!(ai.apiKey||ai.proxyUrl))$("#liveAIOverlay").classList.remove("hidden");
+
+if(state.initialized){
+ if(ai.provider!=="ondevice"){
+   ai={provider:"ondevice",model:"Qwen2.5-0.5B-Instruct-q4f16_1-MLC",apiKey:"",proxyUrl:""};
+   saveAI();
+ }
+ setTimeout(async()=>{
+   try{
+     await ensureLocalModel(ai.model);
+     $("#liveAIOverlay").classList.add("hidden");
+     updateAIState();
+   }catch(e){
+     $("#liveAIOverlay").classList.remove("hidden");
+     const status=$("#localActivationStatus");
+     if(status)status.textContent="Tap below once to restore the on-device model. Authoritative Deep Recall remains available now.";
+   }
+ },250);
+}
 if("serviceWorker"in navigator){
  navigator.serviceWorker.getRegistrations().then(regs=>Promise.all(regs.map(r=>r.unregister()))).catch(()=>{});
 }
