@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v16</title>
+  <title>VoxPilot Chairman v17</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -158,20 +158,56 @@ body{padding-bottom:132px!important}
 .composer{transition:opacity .25s ease}
 
 .founder-attention-queue{
- position:sticky;top:72px;z-index:8500;
- margin:0;padding:9px 12px;
- border-bottom:1px solid var(--line);
+ position:relative;
+ z-index:1;
+ margin:10px 20px 14px;
+ padding:10px 12px;
+ border:1px solid var(--line);
+ border-radius:14px;
  background:#0d120e;
- display:flex;align-items:center;justify-content:space-between;gap:12px
 }
-.founder-attention-queue span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.founder-attention-queue strong{display:block;margin-top:2px;font-size:12px;color:#7fdb92}
-.founder-attention-queue #attentionQueueDetail{font-size:11px;color:var(--muted);text-align:right}
-.founder-attention-queue[data-required="true"]{background:#211308;border-bottom-color:#8d5f26}
-.founder-attention-queue[data-required="true"] strong{color:#f2b35e}
+.attention-summary{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+}
+.founder-attention-queue span{
+ display:block;
+ font-size:9px;
+ text-transform:uppercase;
+ letter-spacing:1px;
+ color:var(--muted);
+}
+.founder-attention-queue strong{
+ display:block;
+ margin-top:2px;
+ font-size:12px;
+ color:#7fdb92;
+}
+#attentionToggle{
+ padding:7px 10px;
+ min-height:34px;
+ font-size:11px;
+}
+.attention-detail{
+ margin-top:9px;
+ padding-top:9px;
+ border-top:1px solid var(--line);
+ font-size:11px;
+ line-height:1.45;
+ color:var(--muted);
+}
+.founder-attention-queue[data-required="true"]{
+ background:#211308;
+ border-color:#8d5f26;
+}
+.founder-attention-queue[data-required="true"] strong{
+ color:#f2b35e;
+}
 @media(max-width:600px){
- .founder-attention-queue{top:112px;align-items:flex-start;flex-direction:column}
- .founder-attention-queue #attentionQueueDetail{text-align:left}
+ .founder-attention-queue{margin:8px 12px 12px}
+ .attention-summary{align-items:flex-start}
 }
 </style>
 </head>
@@ -186,12 +222,17 @@ body{padding-bottom:132px!important}
     <span id="orchestratorAuthority">Authority: Founder</span>
   </div>
 </div>
-<div id="founderAttentionQueue" class="founder-attention-queue">
-  <div>
-    <span>Founder Attention Queue</span>
-    <strong id="attentionQueueStatus">No intervention required</strong>
+<div id="founderAttentionQueue" class="founder-attention-queue" data-required="false">
+  <div class="attention-summary">
+    <div>
+      <span>Founder Attention</span>
+      <strong id="attentionQueueStatus">No intervention required</strong>
+    </div>
+    <button id="attentionToggle" type="button" hidden aria-expanded="false">Details</button>
   </div>
-  <div id="attentionQueueDetail">Chairman is operating within current authority.</div>
+  <div id="attentionQueueDetail" class="attention-detail" hidden>
+    Chairman is operating within current authority.
+  </div>
 </div>
 <div id="chairmanVoiceDock" class="chairman-voice-dock">
   <div class="dock-status">
@@ -257,7 +298,7 @@ body{padding-bottom:132px!important}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v16 · FOUNDER-ATTENTION MINIMIZING RUNTIME
+  VOXPILOT CHAIRMAN v17 · NON-BLOCKING ATTENTION QUEUE
 </div>
 
   <header>
@@ -429,7 +470,7 @@ body{padding-bottom:132px!important}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="16.0.0-single-file";
+window.VOXPILOT_BUILD="17.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -847,10 +888,27 @@ function wakePhraseOnly(raw){
 
 
 function updateAttentionQueue({required=false,title="",detail=""}={}){
- const status=$("#attentionQueueStatus"),body=$("#attentionQueueDetail"),box=$("#founderAttentionQueue");
+ const status=$("#attentionQueueStatus"),body=$("#attentionQueueDetail"),box=$("#founderAttentionQueue"),toggle=$("#attentionToggle");
  if(status)status.textContent=required?(title||"Founder decision required"):"No intervention required";
  if(body)body.textContent=required?(detail||"Chairman requires one decision before continuing."):"Chairman is operating within current authority.";
  if(box)box.dataset.required=String(required);
+ if(body)body.hidden=!required;
+ if(toggle){
+  toggle.hidden=!required;
+  toggle.setAttribute("aria-expanded",String(required));
+  toggle.textContent=required?"Hide":"Details";
+ }
+}
+
+function bindAttentionQueue(){
+ const toggle=$("#attentionToggle"),detail=$("#attentionQueueDetail");
+ if(!toggle||!detail)return;
+ toggle.onclick=()=>{
+  const open=toggle.getAttribute("aria-expanded")==="true";
+  toggle.setAttribute("aria-expanded",String(!open));
+  toggle.textContent=open?"Details":"Hide";
+  detail.hidden=open;
+ };
 }
 function attentionCostFor(plan){
  const weights={identity:0,deep_recall:0,executive_brief:0,next_action:0,runtime_audit:0,conversation:0,memory:0,portfolio:0,task:1,integration:1,approval:3};
@@ -1589,7 +1647,7 @@ setTimeout(async()=>{
   updateOrchestratorUI({intent:"boot",view:"command"},"Booting");
   openView("command");
   setPresence("ready","Ready for the Founder");
-  autonomouslyPrepareCurrentState();
+  bindAttentionQueue();autonomouslyPrepareCurrentState();
   await chairmanAcknowledge(founderGreeting(),{resume:false});
   updateOrchestratorUI({intent:"boot",view:"command"},"Ready");
  }
