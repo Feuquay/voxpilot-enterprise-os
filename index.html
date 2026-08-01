@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v14</title>
+  <title>VoxPilot Chairman v16</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -139,9 +139,61 @@ body{padding-bottom:132px!important}
 .executive-now span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
 .executive-now strong{display:block;margin-top:5px;font-size:14px}
 .messages{scroll-margin-top:120px}
+
+.orchestrator-bar{
+ position:sticky;top:0;z-index:9000;
+ background:linear-gradient(90deg,#11100c,#1a160c);
+ border-bottom:1px solid var(--gold);
+ padding:9px 12px;
+ display:flex;align-items:center;justify-content:space-between;gap:10px
+}
+.orchestrator-bar span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.orchestrator-bar strong{display:block;margin-top:2px;font-size:12px;color:var(--gold)}
+.orchestrator-pills{display:flex;gap:6px;overflow-x:auto}
+.orchestrator-pills span{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:5px 7px;background:#0b0a08}
+@media(max-width:600px){
+ .orchestrator-bar{align-items:flex-start;flex-direction:column}
+ .orchestrator-pills{width:100%}
+}
+.composer{transition:opacity .25s ease}
+
+.founder-attention-queue{
+ position:sticky;top:72px;z-index:8500;
+ margin:0;padding:9px 12px;
+ border-bottom:1px solid var(--line);
+ background:#0d120e;
+ display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.founder-attention-queue span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.founder-attention-queue strong{display:block;margin-top:2px;font-size:12px;color:#7fdb92}
+.founder-attention-queue #attentionQueueDetail{font-size:11px;color:var(--muted);text-align:right}
+.founder-attention-queue[data-required="true"]{background:#211308;border-bottom-color:#8d5f26}
+.founder-attention-queue[data-required="true"] strong{color:#f2b35e}
+@media(max-width:600px){
+ .founder-attention-queue{top:112px;align-items:flex-start;flex-direction:column}
+ .founder-attention-queue #attentionQueueDetail{text-align:left}
+}
 </style>
 </head>
-<body><div id="chairmanVoiceDock" class="chairman-voice-dock">
+<body><div id="orchestratorBar" class="orchestrator-bar">
+  <div>
+    <span>Chairman Orchestration</span>
+    <strong id="orchestratorState">Ready</strong>
+  </div>
+  <div class="orchestrator-pills">
+    <span id="orchestratorIntent">Intent: none</span>
+    <span id="orchestratorView">View: Command</span>
+    <span id="orchestratorAuthority">Authority: Founder</span>
+  </div>
+</div>
+<div id="founderAttentionQueue" class="founder-attention-queue">
+  <div>
+    <span>Founder Attention Queue</span>
+    <strong id="attentionQueueStatus">No intervention required</strong>
+  </div>
+  <div id="attentionQueueDetail">Chairman is operating within current authority.</div>
+</div>
+<div id="chairmanVoiceDock" class="chairman-voice-dock">
   <div class="dock-status">
     <span class="dock-dot" id="dockDot"></span>
     <div><strong>Chairman Voice</strong><small id="conversationStatus">Ready</small></div>
@@ -205,7 +257,7 @@ body{padding-bottom:132px!important}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v14 · EXECUTIVE CONVERSATION CONTROL
+  VOXPILOT CHAIRMAN v16 · FOUNDER-ATTENTION MINIMIZING RUNTIME
 </div>
 
   <header>
@@ -377,7 +429,7 @@ body{padding-bottom:132px!important}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="14.0.0-single-file";
+window.VOXPILOT_BUILD="16.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -546,6 +598,9 @@ OPERATING METHOD
 8. Preserve continuity and correct prior errors rather than restarting the project.
 9. Be decisive and specific; go deeply when the Founder asks for comprehensive recall.
 10. Consequential execution requires Founder approval and audit.
+11. Minimize Founder time: do not ask a question unless the answer changes execution and cannot be inferred safely.
+12. Prefer one decisive recommendation over multiple undifferentiated options.
+13. Open the relevant VoxPilot screen automatically instead of instructing the Founder to navigate.
 
 CURRENT OPTIMIZATION
 Increase enterprise value through revenue, margin, strategic leverage, asset value, capital efficiency, risk reduction, reduced Founder attention, or faster execution.
@@ -701,14 +756,19 @@ function triggerQuick(label){
 }
 function runScreenVoiceCommand(raw){
  const p=String(raw).trim().toLowerCase();
+ if(/^(chairman[,\s]*)?(handle voxpilot|run voxpilot|take over|operate voxpilot)/.test(p)){
+  $("#commandInput").value="Chairman, give me the authoritative executive brief and controlling next action.";
+  execute();return true
+ }
+
  if(wakePhraseOnly(raw)){
   chairmanAcknowledge("Yes, Lewis. I am listening.",{resume:conversationActive});
   return true;
  }
  if(/^(chairman[,\s]*)?(open|show|go to)\s+command/.test(p)){performScreenAction("Command",()=>clickTabByName("Command"));return true}
- if(/^(chairman[,\s]*)?(open|show|go to)\s+brief/.test(p)){performScreenAction("Brief",()=>clickTabByName("Brief"));return true}
- if(/^(chairman[,\s]*)?(open|show|go to)\s+actions?/.test(p)){performScreenAction("Actions",()=>clickTabByName("Actions"));return true}
- if(/^(chairman[,\s]*)?(open|show|go to)\s+integrations?/.test(p)){performScreenAction("Integrations",()=>clickTabByName("Integrations"));return true}
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+brief/.test(p)){updateOrchestratorUI({intent:"screen_control",view:"brief"},"Opening");performScreenAction("Brief",()=>clickTabByName("Brief"));return true}
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+actions?/.test(p)){updateOrchestratorUI({intent:"screen_control",view:"actions"},"Opening");performScreenAction("Actions",()=>clickTabByName("Actions"));return true}
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+integrations?/.test(p)){updateOrchestratorUI({intent:"screen_control",view:"integrations"},"Opening");performScreenAction("Integrations",()=>clickTabByName("Integrations"));return true}
  if(/^(chairman[,\s]*)?(deep recall|authoritative deep recall)/.test(p)){setExecutiveNow("Current action","Authoritative Deep Recall");triggerQuick("deep recall");return true}
  if(/^(chairman[,\s]*)?(executive brief|brief me)/.test(p)){setExecutiveNow("Current action","Executive Brief");triggerQuick("executive brief");return true}
  if(/^(chairman[,\s]*)?(next action|controlling next action)/.test(p)){setExecutiveNow("Current action","Controlling Next Action");triggerQuick("next action");return true}
@@ -768,11 +828,7 @@ function setExecutiveNow(label,value){
  const box=$("#executiveNow");if(!box)return;
  box.innerHTML=`<span>${label}</span><strong>${value}</strong>`;
 }
-function founderGreeting(){
- const hour=new Date().getHours();
- const daypart=hour<12?"Good morning":hour<18?"Good afternoon":"Good evening";
- return `${daypart}, Lewis. Chairman Runtime is online. The on-device model, Founder identity lock, enterprise memory, authoritative recall, voice control, and screen control are active. I am ready for your direction.`;
-}
+function founderGreeting(){return executiveBootBrief();}
 async function chairmanAcknowledge(text,{resume=false}={}){
  setPresence("speaking","Chairman speaking");
  await speakChairman(text,{resume});
@@ -786,6 +842,189 @@ async function performScreenAction(label,action){
 }
 function wakePhraseOnly(raw){
  return /^(chairman|hello chairman|good morning chairman|good afternoon chairman|good evening chairman)[.! ]*$/i.test(String(raw).trim());
+}
+
+
+
+function updateAttentionQueue({required=false,title="",detail=""}={}){
+ const status=$("#attentionQueueStatus"),body=$("#attentionQueueDetail"),box=$("#founderAttentionQueue");
+ if(status)status.textContent=required?(title||"Founder decision required"):"No intervention required";
+ if(body)body.textContent=required?(detail||"Chairman requires one decision before continuing."):"Chairman is operating within current authority.";
+ if(box)box.dataset.required=String(required);
+}
+function attentionCostFor(plan){
+ const weights={identity:0,deep_recall:0,executive_brief:0,next_action:0,runtime_audit:0,conversation:0,memory:0,portfolio:0,task:1,integration:1,approval:3};
+ return weights[plan.intent]??1;
+}
+function founderTimePolicy(prompt,plan){
+ const p=String(prompt||"").toLowerCase();
+ const explicitApproval=/(approve|authorize|consent|confirm|permission)/i.test(p);
+ const consequential=/(send|publish|delete|purchase|buy|commit|push|deploy|execute|email|calendar|transfer|sign|submit)/i.test(p);
+ const missingFact=/(which account|what amount|which recipient|what date|which file|which repository)/i.test(p);
+ if(consequential&&!explicitApproval){
+  return {
+   required:true,
+   type:"approval",
+   title:"One approval required",
+   detail:"Chairman has prepared the consequential action and requires Founder authorization before execution."
+  };
+ }
+ if(missingFact){
+  return {
+   required:true,
+   type:"clarification",
+   title:"One fact required",
+   detail:"Chairman needs one missing fact that cannot be safely inferred."
+  };
+ }
+ return {required:false,type:"none",title:"",detail:""};
+}
+function shouldAutonomouslyOpen(plan){
+ return ["executive_brief","runtime_audit","portfolio","memory","task","integration","approval"].includes(plan.intent);
+}
+function founderTimeOptimizedPlan(prompt){
+ const plan=classifyChairmanIntent(prompt);
+ const attention=founderTimePolicy(prompt,plan);
+ plan.attentionCost=attentionCostFor(plan);
+ plan.requiresFounder=attention.required;
+ plan.attention=attention;
+ return plan;
+}
+function applyFounderTimePlan(plan,prompt){
+ updateAttentionQueue({
+  required:plan.requiresFounder,
+  title:plan.attention.title,
+  detail:plan.attention.detail
+ });
+ updateOrchestratorUI(plan,plan.requiresFounder?"Founder input required":"Operating autonomously");
+ setExecutiveNow("Founder objective",prompt);
+ if(shouldAutonomouslyOpen(plan))openView(plan.view||"command");
+ else openView("command");
+ if(plan.requiresFounder){
+  openView(plan.attention.type==="approval"?"actions":plan.view||"command");
+ }
+}
+function executiveBootBrief(){
+ const pending=state.actions.filter(a=>a.status==="pending").length;
+ const tasks=state.tasks.filter(t=>t.status!=="completed").length;
+ const decisions=state.decisions.length;
+ const memories=state.memories.length;
+ return `Good ${new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening"}, Lewis.
+
+Chairman Runtime is online.
+
+I have reconstructed the current VoxPilot state:
+• ${memories} durable memories
+• ${decisions} Founder decisions
+• ${tasks} open tasks
+• ${pending} pending governed actions
+• ${state.ventures.length} enterprise lanes
+
+The controlling objective remains completing the canonical VoxPilot Chairman runtime while minimizing Founder attention. I will open the correct screen, speak the result, and ask only when a decision is indispensable.`;
+}
+function autonomouslyPrepareCurrentState(){
+ const highestPriority=state.ventures.find(v=>v.id==="VOX")||state.ventures[0];
+ setExecutiveNow("Current controlling objective",highestPriority?.gate||"Close the VoxPilot MVP gate");
+ updateAttentionQueue({required:false});
+ updateOrchestratorUI({intent:"boot",view:"command"},"Ready");
+}
+
+function classifyChairmanIntent(prompt){
+ const p=String(prompt||"").trim().toLowerCase();
+ if(isIntroductionRequest(prompt))return {intent:"identity",view:"command",mode:"authoritative"};
+ if(isDeepRecallRequest(prompt))return {intent:"deep_recall",view:"command",mode:"authoritative"};
+ if(isExecutiveBriefRequest(prompt))return {intent:"executive_brief",view:"brief",mode:"authoritative"};
+ if(isNextActionRequest(prompt))return {intent:"next_action",view:"command",mode:"authoritative"};
+ if(isRuntimeAuditRequest(prompt))return {intent:"runtime_audit",view:"brief",mode:"authoritative"};
+ if(/approve|approval|authorize|permission|consent/i.test(p))return {intent:"approval",view:"actions",mode:"governed"};
+ if(/integration|connector|autodesk|ansys|github|engineering software/i.test(p))return {intent:"integration",view:"integrations",mode:"advisory"};
+ if(/memory|remember|recall a decision|what did i decide/i.test(p))return {intent:"memory",view:"memory",mode:"retrieval"};
+ if(/task|to do|deadline|follow up/i.test(p))return {intent:"task",view:"tasks",mode:"operational"};
+ if(/venture|business|portfolio|company/i.test(p))return {intent:"portfolio",view:"ventures",mode:"operational"};
+ return {intent:"conversation",view:"command",mode:"model"};
+}
+function updateOrchestratorUI(plan,status="Ready"){
+ const state=$("#orchestratorState"),intent=$("#orchestratorIntent"),view=$("#orchestratorView");
+ if(state)state.textContent=status;
+ if(intent)intent.textContent=`Intent: ${plan?.intent||"none"}`;
+ if(view)view.textContent=`View: ${plan?.view||"Command"}`;
+}
+function tabButtonFor(view){
+ return document.querySelector(`[data-tab="${view}"]`);
+}
+function openView(view,{announce=false}={}){
+ const b=tabButtonFor(view);
+ if(!b)return false;
+ b.click();
+ b.scrollIntoView({behavior:"smooth",block:"start"});
+ if(announce)speakChairman(`${b.textContent.trim()} is open.`,{resume:conversationActive});
+ return true;
+}
+function hideFounderFriction(plan){
+ const composer=document.querySelector(".composer");
+ if(!composer)return;
+ const shouldFocus=plan.view==="command";
+ composer.style.opacity=shouldFocus?"1":".42";
+ composer.style.pointerEvents=shouldFocus?"auto":"none";
+}
+function restoreFounderInput(){
+ const composer=document.querySelector(".composer");
+ if(composer){composer.style.opacity="1";composer.style.pointerEvents="auto"}
+}
+function composeAttention(plan,prompt){
+ updateOrchestratorUI(plan,"Reconstructing enterprise state");
+ setExecutiveNow("Founder objective",prompt);
+ openView(plan.view||"command");
+ hideFounderFriction(plan);
+ if(plan.view==="command"){
+  requestAnimationFrame(()=>$("#commandInput")?.scrollIntoView({behavior:"smooth",block:"center"}));
+ }
+}
+function inferApprovalNeed(prompt){
+ const p=String(prompt||"").toLowerCase();
+ return /(send|publish|delete|purchase|commit|push|execute|authorize|approve|change external|email|calendar|github write|deploy)/i.test(p);
+}
+function founderAttentionPolicy(prompt,plan){
+ const needsApproval=inferApprovalNeed(prompt);
+ if(needsApproval){
+  return {
+   requiresFounder:true,
+   message:"Founder approval is required before consequential external execution.",
+   view:"actions"
+  };
+ }
+ return {requiresFounder:false,message:"Chairman may continue without additional Founder attention.",view:plan.view};
+}
+function orchestrateBeforeReasoning(prompt){
+ const plan=founderTimeOptimizedPlan(prompt);
+ applyFounderTimePlan(plan,prompt);
+ return {plan,authority:{
+  requiresFounder:plan.requiresFounder,
+  message:plan.attention.detail,
+  view:plan.attention.type==="approval"?"actions":plan.view
+ }};
+}
+function orchestrateAfterReasoning(orchestration,pending){
+ const plan=orchestration.plan;
+ if(plan.requiresFounder){
+  updateAttentionQueue({
+   required:true,
+   title:plan.attention.title,
+   detail:plan.attention.detail
+  });
+  openView(plan.attention.type==="approval"?"actions":plan.view||"command");
+  setExecutiveNow("Founder attention",plan.attention.title);
+  updateOrchestratorUI(plan,"Awaiting Founder");
+ }else{
+  updateAttentionQueue({required:false});
+  if(shouldAutonomouslyOpen(plan))openView(plan.view||"command");
+  else openView("command");
+  setExecutiveNow("Chairman result","Complete");
+  updateOrchestratorUI(plan,"Complete");
+ }
+ restoreFounderInput();
+ const active=document.querySelector(".tab.active");
+ active?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function authoritativeRoute(prompt){
@@ -1073,14 +1312,13 @@ ${prompt}`;
 }
 async function execute(){
  const box=$("#commandInput"),prompt=box.value.trim();if(!prompt)return;
- setExecutiveNow("Founder command",prompt);
+ const orchestration=orchestrateBeforeReasoning(prompt);
  setPresence("processing","Chairman reasoning");
  box.value="";window.__chairmanAbort=false;const captured=captureFounderCommand(prompt);addMessage("user",prompt);
  const pending={id:uid(),role:"assistant",content:captured?`${captured}\n\nChairman is integrating this into the runtime…`:"Chairman is reasoning…",meta:{pending:true},at:now()};
  ensureSession().messages.push(pending);persist();renderMessages();
  $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");$("#stopButton").style.display="inline-flex";
  try{
-  clickTabByName("Command");
   const runtimeAnswer=authoritativeRoute(prompt);
   const out=runtimeAnswer
    ?runtimeAnswer
@@ -1092,8 +1330,8 @@ async function execute(){
  finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none"}
  compactSessionIfNeeded();persist();renderMessages();renderBrief();renderMemories();renderDecisions();renderTasks();updateAIState();
  const mb=$("#messages");if(mb)mb.scrollIntoView({behavior:"smooth",block:"end"});
- if(pending.content&&!pending.meta?.error){
-   setExecutiveNow("Chairman response","Complete");
+ orchestrateAfterReasoning(orchestration,pending);
+  if(pending.content&&!pending.meta?.error){
    await speakChairman(pending.content,{resume:conversationActive});
   }
  else if(conversationActive)setTimeout(startChairmanListening,400);
@@ -1348,9 +1586,12 @@ $("#dockStop").onclick=()=>{window.__chairmanAbort=true;endConversation();speech
 setTimeout(async()=>{
  if(state.initialized&&!chairmanHasGreeted){
   chairmanHasGreeted=true;
+  updateOrchestratorUI({intent:"boot",view:"command"},"Booting");
+  openView("command");
   setPresence("ready","Ready for the Founder");
-  setExecutiveNow("Current focus","Founder command");
+  autonomouslyPrepareCurrentState();
   await chairmanAcknowledge(founderGreeting(),{resume:false});
+  updateOrchestratorUI({intent:"boot",view:"command"},"Ready");
  }
 },1200);
 
