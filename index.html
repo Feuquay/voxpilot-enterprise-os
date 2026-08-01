@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v18</title>
+  <title>VoxPilot Chairman v19</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -265,6 +265,72 @@ body.show-manual-controls > .founder-attention-queue{display:flex!important}
  .command-actions{grid-template-columns:1fr 1fr}
  #chairmanSendPrimary{grid-column:1/-1}
 }
+
+.live-stage{width:100%}
+.live-stage-label{
+ font-size:10px;
+ letter-spacing:1.4px;
+ color:var(--gold);
+ margin-bottom:12px;
+}
+.live-stage-progress{
+ height:3px;
+ overflow:hidden;
+ border-radius:999px;
+ background:#242017;
+ margin-top:18px;
+}
+.live-stage-progress span{
+ display:block;
+ height:100%;
+ width:30%;
+ background:var(--gold);
+ animation:chairmanProgress 1.4s ease-in-out infinite;
+}
+.live-stage-progress[data-state="ready"] span,
+.live-stage-progress[data-state="complete"] span{
+ width:100%;
+ animation:none;
+}
+.live-stage-progress[data-state="listening"] span{
+ background:#75dc8d;
+}
+.live-stage-progress[data-state="error"] span{
+ background:#ff6b6b;
+}
+@keyframes chairmanProgress{
+ 0%{transform:translateX(-110%)}
+ 100%{transform:translateX(350%)}
+}
+.voice-dock-toggle{
+ width:100%;
+ margin-top:10px;
+ opacity:.65;
+}
+body:not(.show-voice-dock) > .chairman-voice-dock{
+ transform:translateY(calc(100% + 30px));
+ opacity:0;
+ pointer-events:none;
+}
+.chairman-voice-dock{
+ transition:transform .28s ease,opacity .28s ease;
+}
+.chairman-first-shell{
+ padding-bottom:40px!important;
+}
+body.show-voice-dock .chairman-first-shell{
+ padding-bottom:175px!important;
+}
+#chairmanTranscript{
+ min-height:280px;
+ transition:border-color .25s ease,box-shadow .25s ease;
+}
+body[data-chairman-view="brief"] #chairmanTranscript,
+body[data-chairman-view="actions"] #chairmanTranscript,
+body[data-chairman-view="integrations"] #chairmanTranscript{
+ border-color:var(--gold);
+ box-shadow:0 0 26px rgba(214,187,107,.08);
+}
 </style>
 </head>
 <body>
@@ -284,7 +350,11 @@ body.show-manual-controls > .founder-attention-queue{display:flex!important}
 
   <section class="chairman-conversation-stage">
     <div id="chairmanTranscript" class="chairman-transcript">
-      <p class="chairman-line">Chairman is initializing.</p>
+      <div class="live-stage">
+      <div id="liveStageLabel" class="live-stage-label">BOOTING</div>
+      <p id="liveChairmanText" class="chairman-line">Reconstructing identity, enterprise state, memory, and authority.</p>
+      <div id="liveStageProgress" class="live-stage-progress"><span></span></div>
+    </div>
     </div>
     <div id="founderDecisionCard" class="founder-decision-card" hidden>
       <span>Founder decision required</span>
@@ -307,6 +377,7 @@ body.show-manual-controls > .founder-attention-queue{display:flex!important}
   </section>
 
   <button id="manualControlsToggle" class="manual-controls-toggle" type="button">Manual controls</button>
+<button id="voiceDockToggle" class="voice-dock-toggle" type="button">Voice controls</button>
 </div><div id="orchestratorBar" class="orchestrator-bar">
   <div>
     <span>Chairman Orchestration</span>
@@ -394,7 +465,7 @@ body.show-manual-controls > .founder-attention-queue{display:flex!important}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v18 · CHAIRMAN-FIRST OPERATING INTERFACE
+  VOXPILOT CHAIRMAN v19 · SYNCHRONIZED EXECUTIVE PRESENCE
 </div>
 
   <header>
@@ -566,7 +637,7 @@ body.show-manual-controls > .founder-attention-queue{display:flex!important}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="18.0.0-single-file";
+window.VOXPILOT_BUILD="19.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -873,16 +944,35 @@ function chairmanVoice(){
 }
 function speakChairman(text,{resume=false}={}){
  return new Promise(resolve=>{
-  if(!("speechSynthesis"in window)||!text){resolve();return}
-  speechSynthesis.cancel();chairmanSpeaking=true;shouldResumeListening=resume;setConversationStatus("Speaking","speaking");
-  const u=new SpeechSynthesisUtterance(text),v=chairmanVoice();if(v)u.voice=v;
+  if(!text){resolve();return}
+  setChairmanTranscript(text,{state:"speaking"});
+  if(!("speechSynthesis"in window)){
+   setLiveStage("complete");
+   resolve();
+   return;
+  }
+  try{chairmanRecognition?.abort()}catch{}
+  speechSynthesis.cancel();
+  chairmanSpeaking=true;
+  shouldResumeListening=resume;
+  setConversationStatus("Speaking","speaking");
+  const u=new SpeechSynthesisUtterance(String(text));
+  const v=chairmanVoice();if(v)u.voice=v;
   u.rate=.94;u.pitch=.9;u.volume=1;
-  u.onend=u.onerror=()=>{
-   chairmanSpeaking=false;resolve();
-   if(conversationActive&&shouldResumeListening)setTimeout(startChairmanListening,350);
-   else setConversationStatus(conversationActive?"Listening":"Ready",conversationActive?"listening":"ready");
+  let finished=false;
+  const finish=()=>{
+   if(finished)return;
+   finished=true;
+   chairmanSpeaking=false;
+   setLiveStage("complete");
+   setConversationStatus(conversationActive?"Listening":"Ready",conversationActive?"listening":"ready");
+   resolve();
+   if(conversationActive&&shouldResumeListening)setTimeout(startChairmanListening,500);
   };
-  speechSynthesis.speak(u);
+  u.onstart=()=>setLiveStage("speaking");
+  u.onend=finish;
+  u.onerror=finish;
+  try{speechSynthesis.speak(u)}catch{finish()}
  });
 }
 function clickTabByName(name){
@@ -929,13 +1019,13 @@ function runScreenVoiceCommand(raw){
 function buildRecognition(){
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;
  const r=new SR();r.lang="en-US";r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
- r.onstart=()=>setConversationStatus("Listening","listening");
+ r.onstart=()=>{setConversationStatus("Listening","listening");setLiveStage("listening","I am listening, Lewis.")};
  r.onresult=e=>{
   let finalText="",interim="";
   for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t;else interim+=t}
-  if(interim){$("#commandInput").value=interim;setConversationStatus(`Hearing: ${interim}`,"hearing")}
+  if(interim){$("#commandInput").value=interim;setFounderCommandVisible(interim);setConversationStatus(`Hearing: ${interim}`,"hearing");setLiveStage("hearing",interim)}
   if(finalText){
-   $("#commandInput").value=finalText;setConversationStatus("Processing","processing");
+   $("#commandInput").value=finalText;setFounderCommandVisible(finalText);setConversationStatus("Processing","processing");setLiveStage("processing","Chairman is reconstructing context and reasoning.");
    if(!runScreenVoiceCommand(finalText))execute();
    else if(conversationActive)setTimeout(startChairmanListening,600);
   }
@@ -948,7 +1038,7 @@ function buildRecognition(){
  return r;
 }
 function startChairmanListening(){
- if(!conversationActive||chairmanSpeaking)return;
+ if(!conversationActive||chairmanSpeaking||speechSynthesis?.speaking)return;
  if(!chairmanRecognition)chairmanRecognition=buildRecognition();
  if(!chairmanRecognition){setConversationStatus("Voice unavailable","error");return}
  try{chairmanRecognition.start()}catch{}
@@ -1179,22 +1269,100 @@ function orchestrateAfterReasoning(orchestration,pending){
 }
 
 
+
+let liveChairmanBuffer="";
+let liveChairmanState="booting";
+
+function setLiveStage(state,text=""){
+ liveChairmanState=state;
+ const label=$("#liveStageLabel"),body=$("#liveChairmanText"),progress=$("#liveStageProgress");
+ const labels={
+  booting:"BOOTING",
+  ready:"READY",
+  listening:"LISTENING",
+  hearing:"HEARING",
+  processing:"REASONING",
+  speaking:"CHAIRMAN SPEAKING",
+  complete:"COMPLETE",
+  error:"ERROR"
+ };
+ if(label)label.textContent=labels[state]||String(state).toUpperCase();
+ if(text&&body)body.textContent=text;
+ if(progress)progress.dataset.state=state;
+ const live=$("#chairmanLiveState");
+ if(live)live.textContent=labels[state]||String(state).toUpperCase();
+}
+
+function setChairmanTranscript(text,{state="complete",append=false}={}){
+ const transcript=$("#chairmanTranscript"),body=$("#liveChairmanText");
+ if(!text)return;
+ liveChairmanBuffer=append&&liveChairmanBuffer?`${liveChairmanBuffer}\n\n${text}`:String(text);
+ if(body)body.textContent=liveChairmanBuffer;
+ if(transcript)transcript.scrollIntoView({behavior:"smooth",block:"center"});
+ setLiveStage(state);
+}
+
+function setFounderCommandVisible(text){
+ const mirror=$("#founderCommandMirror");
+ if(mirror&&document.activeElement!==mirror)mirror.value=text||"";
+ setExecutiveNow("Founder command",text||"Awaiting Founder direction");
+}
+
+function chairmanOwnsScreen(view="command",focus="conversation"){
+ document.body.dataset.chairmanView=view;
+ if(view!=="command")openView(view);
+ if(focus==="conversation"){
+  $("#chairmanTranscript")?.scrollIntoView({behavior:"smooth",block:"center"});
+ }else if(focus==="objective"){
+  $(".current-objective")?.scrollIntoView({behavior:"smooth",block:"center"});
+ }else if(focus==="approval"){
+  $("#founderDecisionCard")?.scrollIntoView({behavior:"smooth",block:"center"});
+ }
+}
+
+function syncPrimaryConversationButton(){
+ const b=$("#chairmanConversationPrimary");
+ if(b)b.textContent=conversationActive?"End Conversation":"Start Conversation";
+}
+
+function beginChairmanTurn(prompt){
+ setFounderCommandVisible(prompt);
+ setLiveStage("processing","Reconstructing relevant enterprise state and determining the highest-value response.");
+ chairmanOwnsScreen("command","conversation");
+}
+
+function completeChairmanTurn(text,plan){
+ setChairmanTranscript(text,{state:"complete"});
+ const intendedView=plan?.view||"command";
+ chairmanOwnsScreen(intendedView,intendedView==="command"?"conversation":"objective");
+ syncPrimaryConversationButton();
+}
+
+function bindVoiceDockToggle(){
+ const toggle=$("#voiceDockToggle");
+ if(!toggle)return;
+ toggle.onclick=()=>{
+  document.body.classList.toggle("show-voice-dock");
+  toggle.textContent=document.body.classList.contains("show-voice-dock")?"Hide voice controls":"Voice controls";
+ };
+}
+
 function syncChairmanFirstUI(){
  const original=$("#commandInput"),mirror=$("#founderCommandMirror");
  if(original&&mirror&&document.activeElement!==mirror)mirror.value=original.value;
  const s=ensureSession();
  const last=[...s.messages].reverse().find(m=>m.role==="assistant"&&!m.meta?.pending);
- const transcript=$("#chairmanTranscript");
- if(last&&transcript){
-  transcript.innerHTML=`<p class="chairman-line">${escapeHTML(last.content)}</p>`;
+ if(last&&last.content){
+  setChairmanTranscript(last.content,{state:chairmanSpeaking?"speaking":"complete"});
+ }else if(state.initialized){
+  setChairmanTranscript(founderGreeting(),{state:"ready"});
  }
  const objective=$("#primaryObjective");
  if(objective){
   const vox=state.ventures.find(v=>v.id==="VOX");
-  objective.textContent=vox?.gate||"Close the canonical VoxPilot MVP gate";
+  objective.textContent=vox?.gate||"Complete the canonical VoxPilot MVP gate";
  }
- const live=$("#chairmanLiveState");
- if(live)live.textContent=chairmanSpeaking?"SPEAKING":conversationActive?"LISTENING":"ONLINE";
+ syncPrimaryConversationButton();
 }
 function showFounderDecision(title,detail){
  const card=$("#founderDecisionCard");
@@ -1515,6 +1683,7 @@ ${prompt}`;
 }
 async function execute(){
  const box=$("#commandInput"),prompt=box.value.trim();if(!prompt)return;
+ beginChairmanTurn(prompt);
  const orchestration=orchestrateBeforeReasoning(prompt);
  setPresence("processing","Chairman reasoning");
  box.value="";window.__chairmanAbort=false;const captured=captureFounderCommand(prompt);addMessage("user",prompt);
@@ -1536,9 +1705,11 @@ async function execute(){
  const mb=$("#messages");if(mb)mb.scrollIntoView({behavior:"smooth",block:"end"});
  orchestrateAfterReasoning(orchestration,pending);
   if(pending.content&&!pending.meta?.error){
+   completeChairmanTurn(pending.content,orchestration.plan);
    await speakChairman(pending.content,{resume:conversationActive});
+  }else{
+   setLiveStage("error","Chairman could not complete the response.");
   }
- else if(conversationActive)setTimeout(startChairmanListening,400);
 }
 function renderMessages(scroll=true){
  const rows=currentSession?.messages||[];
@@ -1790,14 +1961,20 @@ $("#dockStop").onclick=()=>{window.__chairmanAbort=true;endConversation();speech
 setTimeout(async()=>{
  if(state.initialized&&!chairmanHasGreeted){
   chairmanHasGreeted=true;
-  updateOrchestratorUI({intent:"boot",view:"command"},"Booting");
-  openView("command");
-  setPresence("ready","Ready for the Founder");
-  bindAttentionQueue();bindChairmanFirstUI();autonomouslyPrepareCurrentState();syncChairmanFirstUI();
-  await chairmanAcknowledge(founderGreeting(),{resume:false});
-  updateOrchestratorUI({intent:"boot",view:"command"},"Ready");
+  bindVoiceDockToggle();
+  setLiveStage("booting","Reconstructing Founder identity, enterprise state, memory, decisions, tasks, and authority.");
+  await new Promise(r=>setTimeout(r,450));
+  setLiveStage("processing","Determining the controlling objective and required Founder attention.");
+  await new Promise(r=>setTimeout(r,450));
+  bindChairmanFirstUI();
+  autonomouslyPrepareCurrentState();
+  syncChairmanFirstUI();
+  const greeting=founderGreeting();
+  setChairmanTranscript(greeting,{state:"speaking"});
+  await chairmanAcknowledge(greeting,{resume:false});
+  setLiveStage("ready",greeting);
  }
-},1200);
+},600);
 
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
