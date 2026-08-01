@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v17</title>
+  <title>VoxPilot Chairman v18</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -209,9 +209,105 @@ body{padding-bottom:132px!important}
  .founder-attention-queue{margin:8px 12px 12px}
  .attention-summary{align-items:flex-start}
 }
+
+.chairman-first-shell{
+ min-height:100vh;
+ padding:18px 16px 170px;
+ background:
+ radial-gradient(circle at 50% -10%,rgba(214,187,107,.12),transparent 32%),
+ #070706;
+ color:var(--text);
+}
+.chairman-presence-card{
+ border:1px solid var(--line);
+ border-radius:28px;
+ padding:22px;
+ background:linear-gradient(180deg,#14120d,#090908);
+ box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+.presence-topline{display:flex;justify-content:space-between;gap:12px;font-size:10px;letter-spacing:1.4px;color:var(--gold)}
+.chairman-presence-card h1{font-size:56px;line-height:.95;margin:22px 0 10px}
+.chairman-presence-card p{color:var(--muted);font-size:16px;line-height:1.45}
+.current-objective{margin-top:20px;padding:14px;border-radius:16px;background:#0d0c09;border:1px solid var(--line)}
+.current-objective span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.current-objective strong{display:block;margin-top:6px;font-size:18px;line-height:1.35}
+.chairman-conversation-stage{margin-top:16px}
+.chairman-transcript{
+ min-height:220px;
+ border:1px solid var(--line);
+ border-radius:24px;
+ padding:20px;
+ background:#0d0c09;
+ display:flex;
+ align-items:center;
+}
+.chairman-line{font-size:24px;line-height:1.5;margin:0;white-space:pre-wrap}
+.founder-decision-card{margin-top:14px;border:1px solid #8d5f26;background:#211308;border-radius:20px;padding:18px}
+.founder-decision-card span{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#f2b35e}
+.founder-decision-card strong{display:block;font-size:20px;margin-top:7px}
+.founder-decision-card p{color:var(--muted);line-height:1.5}
+.decision-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chairman-command-bar{margin-top:16px}
+#founderCommandMirror{min-height:110px;border-radius:20px}
+.command-actions{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:9px}
+.command-actions button{min-height:52px}
+.manual-controls-toggle{width:100%;margin-top:14px;opacity:.62}
+body:not(.show-manual-controls) > .orchestrator-bar,
+body:not(.show-manual-controls) > .founder-attention-queue,
+body:not(.show-manual-controls) > #app{display:none!important}
+body.show-manual-controls > #app{display:block!important}
+body.show-manual-controls > .orchestrator-bar,
+body.show-manual-controls > .founder-attention-queue{display:flex!important}
+.chairman-voice-dock{z-index:10000}
+@media(max-width:520px){
+ .chairman-presence-card h1{font-size:48px}
+ .chairman-line{font-size:21px}
+ .command-actions{grid-template-columns:1fr 1fr}
+ #chairmanSendPrimary{grid-column:1/-1}
+}
 </style>
 </head>
-<body><div id="orchestratorBar" class="orchestrator-bar">
+<body>
+<div id="chairmanFirstShell" class="chairman-first-shell">
+  <section class="chairman-presence-card">
+    <div class="presence-topline">
+      <span>VOXPILOT NEXUS</span>
+      <span id="chairmanLiveState">ONLINE</span>
+    </div>
+    <h1>Chairman</h1>
+    <p id="chairmanMission">Operating the enterprise to minimize Founder time.</p>
+    <div class="current-objective">
+      <span>Current objective</span>
+      <strong id="primaryObjective">Reconstructing enterprise state…</strong>
+    </div>
+  </section>
+
+  <section class="chairman-conversation-stage">
+    <div id="chairmanTranscript" class="chairman-transcript">
+      <p class="chairman-line">Chairman is initializing.</p>
+    </div>
+    <div id="founderDecisionCard" class="founder-decision-card" hidden>
+      <span>Founder decision required</span>
+      <strong id="founderDecisionTitle">Approval required</strong>
+      <p id="founderDecisionDetail"></p>
+      <div class="decision-actions">
+        <button id="approveDecision" type="button">Approve</button>
+        <button id="rejectDecision" type="button">Reject</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="chairman-command-bar">
+    <textarea id="founderCommandMirror" placeholder="Speak naturally to Chairman…"></textarea>
+    <div class="command-actions">
+      <button id="chairmanTalkPrimary" type="button">Talk</button>
+      <button id="chairmanConversationPrimary" type="button">Conversation Off</button>
+      <button id="chairmanSendPrimary" type="button">Send</button>
+    </div>
+  </section>
+
+  <button id="manualControlsToggle" class="manual-controls-toggle" type="button">Manual controls</button>
+</div><div id="orchestratorBar" class="orchestrator-bar">
   <div>
     <span>Chairman Orchestration</span>
     <strong id="orchestratorState">Ready</strong>
@@ -298,7 +394,7 @@ body{padding-bottom:132px!important}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v17 · NON-BLOCKING ATTENTION QUEUE
+  VOXPILOT CHAIRMAN v18 · CHAIRMAN-FIRST OPERATING INTERFACE
 </div>
 
   <header>
@@ -470,7 +566,7 @@ body{padding-bottom:132px!important}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="17.0.0-single-file";
+window.VOXPILOT_BUILD="18.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -762,7 +858,10 @@ The local model can no longer claim to be the Founder during identity or executi
 }
 
 let conversationActive=false,chairmanRecognition=null,chairmanSpeaking=false,shouldResumeListening=false;
-function setConversationStatus(text,state="ready"){setPresence(state,text);
+function setConversationStatus(text,state="ready"){
+ const primary=$("#chairmanConversationPrimary");
+ if(primary)primary.textContent=conversationActive?"Conversation On":"Conversation Off";
+ syncChairmanFirstUI();setPresence(state,text);
  const e=$("#conversationStatus");if(e){e.textContent=text;e.dataset.state=state}
  const d=$("#dockDot");if(d)d.dataset.state=state;
  const b=$("#conversationMode");if(b){b.textContent=conversationActive?"Conversation On":"Conversation Off";b.setAttribute("aria-pressed",String(conversationActive))}
@@ -1065,24 +1164,70 @@ function orchestrateBeforeReasoning(prompt){
 function orchestrateAfterReasoning(orchestration,pending){
  const plan=orchestration.plan;
  if(plan.requiresFounder){
-  updateAttentionQueue({
-   required:true,
-   title:plan.attention.title,
-   detail:plan.attention.detail
-  });
-  openView(plan.attention.type==="approval"?"actions":plan.view||"command");
+  updateAttentionQueue({required:true,title:plan.attention.title,detail:plan.attention.detail});
+  showFounderDecision(plan.attention.title,plan.attention.detail);
   setExecutiveNow("Founder attention",plan.attention.title);
   updateOrchestratorUI(plan,"Awaiting Founder");
  }else{
   updateAttentionQueue({required:false});
-  if(shouldAutonomouslyOpen(plan))openView(plan.view||"command");
-  else openView("command");
+  hideFounderDecision();
   setExecutiveNow("Chairman result","Complete");
   updateOrchestratorUI(plan,"Complete");
  }
  restoreFounderInput();
- const active=document.querySelector(".tab.active");
- active?.scrollIntoView({behavior:"smooth",block:"start"});
+ syncChairmanFirstUI();
+}
+
+
+function syncChairmanFirstUI(){
+ const original=$("#commandInput"),mirror=$("#founderCommandMirror");
+ if(original&&mirror&&document.activeElement!==mirror)mirror.value=original.value;
+ const s=ensureSession();
+ const last=[...s.messages].reverse().find(m=>m.role==="assistant"&&!m.meta?.pending);
+ const transcript=$("#chairmanTranscript");
+ if(last&&transcript){
+  transcript.innerHTML=`<p class="chairman-line">${escapeHTML(last.content)}</p>`;
+ }
+ const objective=$("#primaryObjective");
+ if(objective){
+  const vox=state.ventures.find(v=>v.id==="VOX");
+  objective.textContent=vox?.gate||"Close the canonical VoxPilot MVP gate";
+ }
+ const live=$("#chairmanLiveState");
+ if(live)live.textContent=chairmanSpeaking?"SPEAKING":conversationActive?"LISTENING":"ONLINE";
+}
+function showFounderDecision(title,detail){
+ const card=$("#founderDecisionCard");
+ if(!card)return;
+ $("#founderDecisionTitle").textContent=title||"Approval required";
+ $("#founderDecisionDetail").textContent=detail||"Chairman requires Founder authorization.";
+ card.hidden=false;
+ card.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function hideFounderDecision(){
+ const card=$("#founderDecisionCard");
+ if(card)card.hidden=true;
+}
+function bindChairmanFirstUI(){
+ const mirror=$("#founderCommandMirror"),original=$("#commandInput");
+ if(mirror&&original){
+  mirror.oninput=()=>{original.value=mirror.value};
+  mirror.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();original.value=mirror.value;execute()}};
+ }
+ $("#chairmanSendPrimary").onclick=()=>{if(original&&mirror)original.value=mirror.value;execute()};
+ $("#chairmanTalkPrimary").onclick=()=>$("#dockSpeak")?.click();
+ $("#chairmanConversationPrimary").onclick=()=>$("#conversationMode")?.click();
+ $("#manualControlsToggle").onclick=()=>document.body.classList.toggle("show-manual-controls");
+ $("#approveDecision").onclick=()=>{
+  hideFounderDecision();
+  addMessage("assistant","Founder approval recorded. Chairman may continue within that authorization.",{confidence:.99,domains:["Founder Authority"]});
+  renderMessages();syncChairmanFirstUI();
+ };
+ $("#rejectDecision").onclick=()=>{
+  hideFounderDecision();
+  addMessage("assistant","Founder rejected the proposed action. Chairman will not execute it.",{confidence:.99,domains:["Founder Authority"]});
+  renderMessages();syncChairmanFirstUI();
+ };
 }
 
 function authoritativeRoute(prompt){
@@ -1387,6 +1532,7 @@ async function execute(){
  }catch(e){pending.content=`Chairman runtime error: ${e.message}`;pending.meta={error:true};audit("provider_error",e.message)}
  finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none"}
  compactSessionIfNeeded();persist();renderMessages();renderBrief();renderMemories();renderDecisions();renderTasks();updateAIState();
+ syncChairmanFirstUI();
  const mb=$("#messages");if(mb)mb.scrollIntoView({behavior:"smooth",block:"end"});
  orchestrateAfterReasoning(orchestration,pending);
   if(pending.content&&!pending.meta?.error){
@@ -1647,7 +1793,7 @@ setTimeout(async()=>{
   updateOrchestratorUI({intent:"boot",view:"command"},"Booting");
   openView("command");
   setPresence("ready","Ready for the Founder");
-  bindAttentionQueue();autonomouslyPrepareCurrentState();
+  bindAttentionQueue();bindChairmanFirstUI();autonomouslyPrepareCurrentState();syncChairmanFirstUI();
   await chairmanAcknowledge(founderGreeting(),{resume:false});
   updateOrchestratorUI({intent:"boot",view:"command"},"Ready");
  }
