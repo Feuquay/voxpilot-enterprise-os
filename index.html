@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v11</title>
+  <title>VoxPilot Chairman v12</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -100,6 +100,13 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 .identity-lock{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
 .identity-lock span{border:1px solid #3d6c47;background:#0c1b10;color:#84e29a;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:900;letter-spacing:.8px}
+
+.voice-console{border:1px solid var(--line);border-radius:16px;padding:12px;margin:0 0 12px;background:#0e0d0a}
+.voice-console-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.voice-console-head strong{display:block;font-size:15px}.voice-console-head small{display:block;color:var(--muted);margin-top:3px}
+.voice-toggle{background:var(--gold)!important;color:#090806!important;min-height:44px}.voice-toggle[aria-pressed="true"]{background:#14321c!important;color:#86e89d!important;border-color:#3d8050!important}
+.voice-options{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}.voice-options label{display:flex;align-items:center;gap:6px}.voice-options input{width:18px;height:18px}
+.voice-help{font-size:11px;line-height:1.45;color:var(--muted);margin-top:9px}#conversationStatus[data-state="listening"],#conversationStatus[data-state="hearing"]{color:#84e29a}#conversationStatus[data-state="speaking"]{color:var(--gold)}
+@media(max-width:430px){.voice-console-head{align-items:flex-start;flex-direction:column}.voice-toggle{width:100%}}
 </style>
 </head>
 <body>
@@ -156,7 +163,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v11 · IDENTITY-LOCKED EXECUTIVE RUNTIME
+  VOXPILOT CHAIRMAN v12 · CONVERSATIONAL VOICE CONTROL
 </div>
 
   <header>
@@ -189,11 +196,15 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 <button data-command="Chairman, perform the authoritative runtime audit.">Runtime Audit</button>
 </div>
 <div class="runtime-mode-note">Deep Recall is synthesized by the persistent VoxPilot runtime—not delegated to the small local model.</div><div class="identity-lock"><span>FOUNDER: LEWIS FRANKLIN FEUQUAY</span><span>RUNTIME: CHAIRMAN</span></div><div id="runtimeStats" class="runtime-stats"></div>
-<div id="messages" class="messages"></div>
+<div class="voice-console">
+<div class="voice-console-head"><div><strong>Conversational Chairman</strong><small id="conversationStatus">Manual mode</small></div><button id="conversationMode" class="voice-toggle" aria-pressed="false">Start Conversation</button></div>
+<div class="voice-options"><label><input id="autoSpeak" type="checkbox" checked> Speak replies</label><label><input id="autoListen" type="checkbox" checked> Listen again</label></div>
+<div class="voice-help">Say “Chairman, deep recall,” “open Brief,” “open Actions,” “scroll down,” “new session,” or ask a normal question.</div>
+</div><div id="messages" class="messages" aria-live="polite"></div>
       <div class="composer">
         <textarea id="commandInput" placeholder="Speak directly to Chairman…"></textarea>
         <div class="row">
-          <button id="micButton">Speak</button><button id="readLast">Read Reply</button>
+          <button id="micButton">Speak Once</button><button id="readLast">Read Reply</button>
           <button id="newSession">New Session</button>
           <button id="stopButton" class="hidden" style="display:none">Stop</button><button id="sendButton" class="primary">Send</button>
         </div>
@@ -315,7 +326,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="11.0.0-single-file";
+window.VOXPILOT_BUILD="12.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -602,6 +613,34 @@ NOT YET COMPLETE
 PRIMARY FAILURE CORRECTED IN v11
 The local model can no longer claim to be the Founder during identity or executive-runtime commands.`,confidence:.99,domains:["Runtime Audit","Security","Engineering"],authoritative:true};
 }
+
+let conversationActive=false,chairmanRecognition=null,chairmanSpeaking=false,shouldResumeListening=false;
+function setConversationStatus(text,state=""){const e=$("#conversationStatus");if(e){e.textContent=text;e.dataset.state=state}const b=$("#conversationMode");if(b){b.textContent=conversationActive?"End Conversation":"Start Conversation";b.setAttribute("aria-pressed",String(conversationActive))}}
+function chairmanVoice(){if(!("speechSynthesis"in window))return null;const v=speechSynthesis.getVoices();return v.find(x=>/en-US/i.test(x.lang)&&/Samantha|Daniel|Alex|Aaron|Evan|Fred/i.test(x.name))||v.find(x=>/en-US/i.test(x.lang))||v[0]||null}
+function speakChairman(text,{resume=false}={}){return new Promise(resolve=>{if(!("speechSynthesis"in window)||!text){resolve();return}speechSynthesis.cancel();chairmanSpeaking=true;shouldResumeListening=resume;setConversationStatus("Chairman speaking","speaking");const u=new SpeechSynthesisUtterance(text),v=chairmanVoice();if(v)u.voice=v;u.rate=.94;u.pitch=.9;u.volume=1;u.onend=u.onerror=()=>{chairmanSpeaking=false;setConversationStatus(conversationActive?"Listening…":"Manual mode",conversationActive?"listening":"");resolve();if(conversationActive&&shouldResumeListening&&$("#autoListen")?.checked)setTimeout(startChairmanListening,350)};speechSynthesis.speak(u)})}
+function clickTabByName(name){const w=String(name).toLowerCase(),bs=[...document.querySelectorAll("button")],b=bs.find(x=>x.textContent.trim().toLowerCase()===w)||bs.find(x=>x.textContent.trim().toLowerCase().startsWith(w));if(b){b.click();b.scrollIntoView({behavior:"smooth",block:"start"});return true}return false}
+function runScreenVoiceCommand(raw){const p=String(raw).trim().toLowerCase();
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+command/.test(p))return clickTabByName("Command");
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+brief/.test(p))return clickTabByName("Brief");
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+actions?/.test(p))return clickTabByName("Actions");
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+integrations?/.test(p))return clickTabByName("Integrations");
+ if(/^(chairman[,\s]*)?(deep recall|authoritative deep recall)/.test(p)){const b=[...document.querySelectorAll("[data-command]")].find(x=>/deep recall/i.test(x.textContent));if(b){b.click();return true}}
+ if(/^(chairman[,\s]*)?(executive brief|brief me)/.test(p)){const b=[...document.querySelectorAll("[data-command]")].find(x=>/executive brief/i.test(x.textContent));if(b){b.click();return true}}
+ if(/^(chairman[,\s]*)?(next action|controlling next action)/.test(p)){const b=[...document.querySelectorAll("[data-command]")].find(x=>/next action/i.test(x.textContent));if(b){b.click();return true}}
+ if(/^(chairman[,\s]*)?(runtime audit|audit runtime)/.test(p)){const b=[...document.querySelectorAll("[data-command]")].find(x=>/runtime audit/i.test(x.textContent));if(b){b.click();return true}}
+ if(/^(chairman[,\s]*)?new session/.test(p)){$("#newSession").click();return true}
+ if(/^(chairman[,\s]*)?stop/.test(p)){window.__chairmanAbort=true;speechSynthesis?.cancel();stopChairmanListening();return true}
+ if(/scroll down|move down/.test(p)){window.scrollBy({top:Math.round(innerHeight*.72),behavior:"smooth"});return true}
+ if(/scroll up|move up/.test(p)){window.scrollBy({top:-Math.round(innerHeight*.72),behavior:"smooth"});return true}
+ if(/go to top|scroll to top/.test(p)){window.scrollTo({top:0,behavior:"smooth"});return true}
+ if(/go to bottom|scroll to bottom/.test(p)){window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});return true}
+ return false}
+function buildRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;const r=new SR();r.lang="en-US";r.continuous=false;r.interimResults=true;r.maxAlternatives=1;r.onstart=()=>setConversationStatus("Listening…","listening");r.onresult=e=>{let f="",i="";for(let n=e.resultIndex;n<e.results.length;n++){const t=e.results[n][0].transcript;if(e.results[n].isFinal)f+=t;else i+=t}if(i){$("#commandInput").value=i;setConversationStatus(`Hearing: ${i}`,"hearing")}if(f){$("#commandInput").value=f;setConversationStatus("Processing…","processing");if(!runScreenVoiceCommand(f))execute();else if(conversationActive&&$("#autoListen")?.checked)setTimeout(startChairmanListening,650)}};r.onerror=e=>{if(e.error!=="aborted"&&e.error!=="no-speech")setConversationStatus(`Voice error: ${e.error}`,"error");if(conversationActive&&e.error==="no-speech")setTimeout(startChairmanListening,500)};r.onend=()=>{if(conversationActive&&!chairmanSpeaking&&$("#autoListen")?.checked&&document.visibilityState==="visible")setTimeout(startChairmanListening,450)};return r}
+function startChairmanListening(){if(!conversationActive||chairmanSpeaking)return;if(!chairmanRecognition)chairmanRecognition=buildRecognition();if(!chairmanRecognition){setConversationStatus("Voice recognition unavailable","error");return}try{chairmanRecognition.start()}catch{}}
+function stopChairmanListening(){try{chairmanRecognition?.abort()}catch{}setConversationStatus(conversationActive?"Paused":"Manual mode",conversationActive?"paused":"")}
+function startConversation(){conversationActive=true;setConversationStatus("Listening…","listening");startChairmanListening()}
+function endConversation(){conversationActive=false;shouldResumeListening=false;stopChairmanListening();speechSynthesis?.cancel();setConversationStatus("Manual mode","")}
+
 function authoritativeRoute(prompt){
  if(isIntroductionRequest(prompt))return authoritativeIntroduction();
  if(isDeepRecallRequest(prompt))return executiveRecallSynthesis(prompt);
@@ -902,6 +941,9 @@ async function execute(){
  }catch(e){pending.content=`Chairman runtime error: ${e.message}`;pending.meta={error:true};audit("provider_error",e.message)}
  finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none"}
  compactSessionIfNeeded();persist();renderMessages();renderBrief();renderMemories();renderDecisions();renderTasks();updateAIState();
+ const mb=$("#messages");if(mb)mb.scrollIntoView({behavior:"smooth",block:"end"});
+ if($("#autoSpeak")?.checked&&pending.content&&!pending.meta?.error)await speakChairman(pending.content,{resume:conversationActive});
+ else if(conversationActive&&$("#autoListen")?.checked)setTimeout(startChairmanListening,400);
 }
 function renderMessages(scroll=true){
  const rows=currentSession?.messages||[];
@@ -1039,8 +1081,8 @@ if(deepRecallButton){
 }
 $("#quickCommands").onclick=e=>{const b=e.target.closest("[data-command]");if(!b)return;$("#commandInput").value=b.dataset.command;execute()};
 $("#stopButton").onclick=()=>{window.__chairmanAbort=true;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none";$("#sendButton").disabled=false};
-$("#readLast").onclick=()=>{const s=ensureSession(),last=[...s.messages].reverse().find(m=>m.role==="assistant"&&!m.meta?.pending);if(!last||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(last.content);u.rate=.96;speechSynthesis.speak(u)};
-$("#sendButton").onclick=execute;$("#commandInput").onkeydown=e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))execute()};
+$("#readLast").onclick=()=>{const s=ensureSession(),last=[...s.messages].reverse().find(m=>m.role==="assistant"&&!m.meta?.pending);if(last)speakChairman(last.content,{resume:false})};
+$("#sendButton").onclick=execute;$("#commandInput").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();execute()}};
 $("#newSession").onclick=()=>{currentSession=null;renderMessages();audit("new_session","Founder opened a new executive session")};
 $("#saveMemory").onclick=()=>{const c=$("#memoryInput").value.trim();if(!c)return;state.memories.unshift({id:uid(),content:c,type:$("#memoryType").value,scope:"enterprise",provenance:"Founder",created_at:now()});$("#memoryInput").value="";audit("memory_created",c);renderMemories();renderBrief()};
 $("#memorySearch").oninput=renderMemories;
@@ -1139,7 +1181,10 @@ categories.forEach(c=>{const o=document.createElement("option");o.value=c;o.text
 $("#integrationSearch").oninput=renderIntegrations;$("#integrationCategory").onchange=renderIntegrations;
 $("#showArchitecture").onclick=showArchitecture;$("#showWorkflows").onclick=showWorkflows;
 
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){const r=new SR();r.lang="en-US";r.onresult=e=>{$("#commandInput").value=e.results[0][0].transcript};$("#micButton").onclick=()=>r.start()}else{$("#micButton").disabled=true;$("#micButton").textContent="Voice unavailable"}
+const manualRecognition=buildRecognition();
+if(manualRecognition){$("#micButton").onclick=()=>{conversationActive=false;setConversationStatus("Listening once…","listening");try{manualRecognition.start()}catch{}}}
+else{$("#micButton").disabled=true;$("#micButton").textContent="Voice unavailable"}
+$("#conversationMode").onclick=()=>conversationActive?endConversation():startConversation();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
 evaluateTasks();renderAll();updateAIState();
