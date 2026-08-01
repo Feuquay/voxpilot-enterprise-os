@@ -60,7 +60,32 @@ const seed=()=>({
  audit:[{id:uid(),type:"runtime_created",actor:"Founder",at:now(),detail:"VoxPilot Chairman v7 executive runtime created"}],
  chairman_lock:true
 })
-function load(){try{const x=JSON.parse(localStorage.getItem(DB_KEY));return x||seed()}catch{return seed()}}
+function mergeUniqueByContent(target,source){
+ const existing=new Set(target.map(x=>String(x.content||x).toLowerCase()));
+ source.forEach(x=>{const key=String(x.content||x).toLowerCase();if(!existing.has(key)){target.push(x);existing.add(key)}});
+}
+function migrateState(s){
+ const baseline=seed();
+ s.version=8;
+ s.doctrine=s.doctrine||[];
+ baseline.doctrine.forEach(x=>{if(!s.doctrine.includes(x))s.doctrine.push(x)});
+ s.memories=s.memories||[];mergeUniqueByContent(s.memories,baseline.memories);
+ s.ventures=s.ventures||[];
+ baseline.ventures.forEach(v=>{
+  const existing=s.ventures.find(x=>x.id===v.id||x.name===v.name);
+  if(existing)Object.assign(existing,{role:v.role,gate:v.gate,status:existing.status||v.status});
+  else s.ventures.push(v);
+ });
+ s.sessions=s.sessions||[];s.decisions=s.decisions||[];s.actions=s.actions||[];s.tasks=s.tasks||[];s.audit=s.audit||[];
+ s.chairman_lock=s.chairman_lock!==false;
+ return s;
+}
+function load(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  return migrateState(raw?JSON.parse(raw):seed());
+ }catch{return migrateState(seed())}
+}
 function persist(){localStorage.setItem(DB_KEY,JSON.stringify(state))}
 function loadSession(key,fallback){try{return JSON.parse(sessionStorage.getItem(key))||fallback}catch{return fallback}}
 let state=load();
@@ -165,6 +190,115 @@ async function ensureLocalModel(modelId=ai.model){
  })();
  try{return await localEngineLoading}
  finally{localEngineLoading=null}
+}
+
+
+function isDeepRecallRequest(prompt){
+ return /(recall|remember).*(everything|complete|comprehensive|deep|all code|all enterprise)|complete.*(architecture|enterprise|voxpilot)|deep recall/i.test(prompt);
+}
+function evidenceLabel(value){
+ return value?"Verified runtime record":"Unknown";
+}
+function executiveRecallSynthesis(prompt){
+ const pendingActions=state.actions.filter(a=>a.status==="pending");
+ const openTasks=state.tasks.filter(t=>t.status!=="completed");
+ const decisions=state.decisions.slice(0,12);
+ const memories=relevantMemories(prompt,24);
+ const ventures=state.ventures;
+ const vox=ventures.find(v=>v.id==="VOX")||ventures[0];
+
+ const sections=[];
+ sections.push(`CHAIRMAN — COMPLETE OPERATIONAL RECONSTRUCTION
+
+FOUNDATIONAL OBJECTIVE
+VoxPilot Nexus is the central platform of the Sovereign Enterprise. Chairman is the persistent Founder-facing executive cognition runtime inside VoxPilot—not a generic chatbot and not merely the local language model. VoxPilot owns identity, doctrine, memory, enterprise state, decisions, approvals, permissions, evidence, audit, task continuity, and provider routing. The language model is a replaceable reasoning substrate beneath that runtime.`);
+
+ sections.push(`STANDALONE AI LINEAGE
+• The locked engineering reference is claw-code-main.zip unless the Founder replaces it.
+• The intended Claude/Claw-derived integration is the agent-runtime architecture: iterative agent loop, context assembly and compression, permissioned tool routing, task packets, sessions, subagents, filesystem/terminal execution patterns, provider abstraction, and worker orchestration.
+• The present iPhone deployment now runs an open Qwen model locally through Safari WebGPU. This makes inference local and token-free after caching.
+• Anthropic Claude model weights are not embedded; the Claude-derived value is the runtime architecture absorbed into VoxPilot.
+• The earlier failure occurred because the 0.5B model was being asked to reconstruct the enterprise by itself. Version 8 moves authoritative recall into the VoxPilot runtime, where it belongs.`);
+
+ sections.push(`CURRENT RUNTIME STATE
+• On-device inference provider: ${ai.provider==="ondevice"?ai.model:"not currently selected"}
+• Durable memories: ${state.memories.length}
+• Executive sessions: ${state.sessions.length}
+• Recorded Founder decisions: ${state.decisions.length}
+• Pending governed actions: ${pendingActions.length}
+• Open tasks: ${openTasks.length}
+• Audit events: ${state.audit.length}
+• Founder authority: final
+• Chairman Lock: ${state.chairman_lock?"active":"inactive"}`);
+
+ sections.push(`ENTERPRISE PORTFOLIO
+${ventures.map(v=>`• ${v.name} — ${v.status}
+  Role: ${v.role}
+  Controlling gate: ${v.gate}`).join("\n")}`);
+
+ sections.push(`VOXPILOT ARCHITECTURE
+Founder
+  ↓
+Chairman Runtime
+  ↓
+VoxPilot Nexus
+  ├─ Founder doctrine and fidelity
+  ├─ Durable enterprise memory
+  ├─ Conversation and decision lineage
+  ├─ Mission and task engine
+  ├─ Governed action proposals and approvals
+  ├─ Evidence, provenance, and audit
+  ├─ Domain replicants and specialist consultation
+  ├─ Model router: on-device first, optional cloud escalation
+  ├─ Connector and tool boundary
+  └─ iPhone-first command interface
+
+The runtime is the enduring enterprise asset. Interfaces and models are replaceable.`);
+
+ sections.push(`CURRENT FOUNDER DECISIONS
+${decisions.length?decisions.map(d=>`• ${d.title}: ${d.text}`).join("\n"):"• No additional Founder decisions have yet been entered through the current app installation."}`);
+
+ sections.push(`RELEVANT DURABLE MEMORY
+${memories.map(m=>`• [${String(m.type).toUpperCase()}] ${m.content}`).join("\n")}`);
+
+ sections.push(`VERIFIED CAPABILITIES NOW PRESENT
+• GitHub Pages deployment on the Founder's iPhone
+• Local WebGPU language-model inference
+• Persistent browser-held Chairman state
+• Founder doctrine, ventures, memories, sessions, decisions, tasks, actions, and audit
+• Voice input
+• Optional reply playback
+• Provider abstraction and optional cloud escalation
+• Structured deep-recall synthesis independent of model compliance
+• Explicit approval boundary for consequential actions`);
+
+ sections.push(`CAPABILITIES NOT YET COMPLETE
+• Native signed iOS application and App Store/TestFlight packaging
+• Cryptographically encrypted durable sync across devices
+• Live execution against GitHub, Autodesk, Ansys, email, calendars, files, terminals, or vendor engineering systems
+• Full semantic vector index over the complete historical enterprise corpus
+• Mac/GPU worker mesh
+• Bounded domain replicants running as independent services
+• Production-grade identity, key management, backups, and recovery
+• Verified physical merge of inaccessible source archives beyond the code actually deployed`);
+
+ sections.push(`CONTROLLING NEXT ACTION
+${vox?.gate||"Close the five-field VoxPilot MVP definition."}
+
+The immediate engineering priority is to finish the Chairman knowledge substrate before adding more surface integrations: import the complete enterprise doctrine and verified project records into a structured local knowledge pack, then let the runtime retrieve and synthesize that pack deterministically before invoking the local model.`);
+
+ sections.push(`FOUNDER COMMANDS NOW SUPPORTED
+• “Remember that …” stores durable memory.
+• “Decision: …” records a Founder decision.
+• “Task: …” creates an executive task.
+• “Chairman, recall everything comprehensively and deeply” invokes this authoritative runtime reconstruction rather than relying on the small model alone.`);
+
+ return {
+  text:sections.join("\n\n"),
+  confidence:.98,
+  domains:["VoxPilot Runtime","Enterprise Portfolio","Engineering & Security"],
+  deterministicRecall:true
+ };
 }
 
 function classifyFounderCommand(prompt){
@@ -334,7 +468,11 @@ async function execute(){
  ensureSession().messages.push(pending);persist();renderMessages();
  $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");
  try{
-  const out=ai.provider==="ondevice"?await onDeviceCompletion(prompt,text=>{pending.content=text;renderMessages(false)}):await providerCall(prompt);
+  const out=isDeepRecallRequest(prompt)
+   ?executiveRecallSynthesis(prompt)
+   :ai.provider==="ondevice"
+     ?await onDeviceCompletion(prompt,text=>{pending.content=text;renderMessages(false)})
+     :await providerCall(prompt);
   pending.content=out.text;pending.meta={confidence:out.confidence,domains:out.domains,diagnostic:out.diagnostic};audit("executive_response",`${ai.provider}; confidence ${out.confidence}`);
  }catch(e){pending.content=`Chairman runtime error: ${e.message}`;pending.meta={error:true};audit("provider_error",e.message)}
  finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden")}
