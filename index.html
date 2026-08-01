@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v13</title>
+  <title>VoxPilot Chairman v14</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -121,6 +121,24 @@ body{padding-bottom:132px!important}
  .dock-status{justify-content:center}.dock-actions{display:grid;grid-template-columns:1fr 1.35fr 1fr}.dock-actions button{width:100%}
  body{padding-bottom:172px!important}
 }
+
+.executive-conversation-panel{
+ border:1px solid var(--line);border-radius:18px;padding:14px;margin:0 0 12px;
+ background:linear-gradient(180deg,#15130d,#0c0b08)
+}
+.executive-presence{display:flex;align-items:center;gap:12px}
+.executive-presence strong{display:block;font-size:15px}
+.executive-presence small{display:block;color:var(--muted);margin-top:3px}
+.presence-orb{width:38px;height:38px;border-radius:50%;background:#555;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
+.presence-orb[data-state="ready"]{background:#355f3d;box-shadow:0 0 16px rgba(103,219,134,.35)}
+.presence-orb[data-state="listening"],.presence-orb[data-state="hearing"]{background:#67db86;box-shadow:0 0 22px #67db86}
+.presence-orb[data-state="processing"]{background:#64a7ff;box-shadow:0 0 22px #64a7ff}
+.presence-orb[data-state="speaking"]{background:var(--gold);box-shadow:0 0 22px var(--gold)}
+.presence-orb[data-state="error"]{background:#ff6b6b;box-shadow:0 0 22px #ff6b6b}
+.executive-now{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.executive-now span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.executive-now strong{display:block;margin-top:5px;font-size:14px}
+.messages{scroll-margin-top:120px}
 </style>
 </head>
 <body><div id="chairmanVoiceDock" class="chairman-voice-dock">
@@ -187,7 +205,7 @@ body{padding-bottom:132px!important}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v13 · ALWAYS-VISIBLE VOICE RUNTIME
+  VOXPILOT CHAIRMAN v14 · EXECUTIVE CONVERSATION CONTROL
 </div>
 
   <header>
@@ -220,6 +238,19 @@ body{padding-bottom:132px!important}
 <button data-command="Chairman, perform the authoritative runtime audit.">Runtime Audit</button>
 </div>
 <div class="runtime-mode-note">Deep Recall is synthesized by the persistent VoxPilot runtime—not delegated to the small local model.</div><div class="identity-lock"><span>FOUNDER: LEWIS FRANKLIN FEUQUAY</span><span>RUNTIME: CHAIRMAN</span></div><div id="runtimeStats" class="runtime-stats"></div>
+<div class="executive-conversation-panel">
+  <div class="executive-presence">
+    <div class="presence-orb" id="presenceOrb"></div>
+    <div>
+      <strong>Chairman Executive Presence</strong>
+      <small id="presenceStatus">Ready for the Founder</small>
+    </div>
+  </div>
+  <div class="executive-now" id="executiveNow">
+    <span>Current focus</span>
+    <strong>Awaiting Founder direction</strong>
+  </div>
+</div>
 <div id="messages" class="messages"></div>
       <div class="composer">
         <textarea id="commandInput" placeholder="Speak directly to Chairman…"></textarea>
@@ -346,7 +377,7 @@ body{padding-bottom:132px!important}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="13.0.0-single-file";
+window.VOXPILOT_BUILD="14.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -635,7 +666,7 @@ The local model can no longer claim to be the Founder during identity or executi
 }
 
 let conversationActive=false,chairmanRecognition=null,chairmanSpeaking=false,shouldResumeListening=false;
-function setConversationStatus(text,state="ready"){
+function setConversationStatus(text,state="ready"){setPresence(state,text);
  const e=$("#conversationStatus");if(e){e.textContent=text;e.dataset.state=state}
  const d=$("#dockDot");if(d)d.dataset.state=state;
  const b=$("#conversationMode");if(b){b.textContent=conversationActive?"Conversation On":"Conversation Off";b.setAttribute("aria-pressed",String(conversationActive))}
@@ -670,20 +701,29 @@ function triggerQuick(label){
 }
 function runScreenVoiceCommand(raw){
  const p=String(raw).trim().toLowerCase();
- if(/^(chairman[,\s]*)?(open|show|go to)\s+command/.test(p))return clickTabByName("Command");
- if(/^(chairman[,\s]*)?(open|show|go to)\s+brief/.test(p))return clickTabByName("Brief");
- if(/^(chairman[,\s]*)?(open|show|go to)\s+actions?/.test(p))return clickTabByName("Actions");
- if(/^(chairman[,\s]*)?(open|show|go to)\s+integrations?/.test(p))return clickTabByName("Integrations");
- if(/^(chairman[,\s]*)?(deep recall|authoritative deep recall)/.test(p))return triggerQuick("deep recall");
- if(/^(chairman[,\s]*)?(executive brief|brief me)/.test(p))return triggerQuick("executive brief");
- if(/^(chairman[,\s]*)?(next action|controlling next action)/.test(p))return triggerQuick("next action");
- if(/^(chairman[,\s]*)?(runtime audit|audit runtime)/.test(p))return triggerQuick("runtime audit");
- if(/^(chairman[,\s]*)?new session/.test(p)){$("#newSession").click();return true}
- if(/^(chairman[,\s]*)?stop/.test(p)){window.__chairmanAbort=true;endConversation();speechSynthesis?.cancel();return true}
- if(/scroll down|move down/.test(p)){window.scrollBy({top:Math.round(innerHeight*.72),behavior:"smooth"});return true}
- if(/scroll up|move up/.test(p)){window.scrollBy({top:-Math.round(innerHeight*.72),behavior:"smooth"});return true}
- if(/go to top|scroll to top/.test(p)){window.scrollTo({top:0,behavior:"smooth"});return true}
- if(/go to bottom|scroll to bottom/.test(p)){window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});return true}
+ if(wakePhraseOnly(raw)){
+  chairmanAcknowledge("Yes, Lewis. I am listening.",{resume:conversationActive});
+  return true;
+ }
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+command/.test(p)){performScreenAction("Command",()=>clickTabByName("Command"));return true}
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+brief/.test(p)){performScreenAction("Brief",()=>clickTabByName("Brief"));return true}
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+actions?/.test(p)){performScreenAction("Actions",()=>clickTabByName("Actions"));return true}
+ if(/^(chairman[,\s]*)?(open|show|go to)\s+integrations?/.test(p)){performScreenAction("Integrations",()=>clickTabByName("Integrations"));return true}
+ if(/^(chairman[,\s]*)?(deep recall|authoritative deep recall)/.test(p)){setExecutiveNow("Current action","Authoritative Deep Recall");triggerQuick("deep recall");return true}
+ if(/^(chairman[,\s]*)?(executive brief|brief me)/.test(p)){setExecutiveNow("Current action","Executive Brief");triggerQuick("executive brief");return true}
+ if(/^(chairman[,\s]*)?(next action|controlling next action)/.test(p)){setExecutiveNow("Current action","Controlling Next Action");triggerQuick("next action");return true}
+ if(/^(chairman[,\s]*)?(runtime audit|audit runtime)/.test(p)){setExecutiveNow("Current action","Runtime Audit");triggerQuick("runtime audit");return true}
+ if(/^(chairman[,\s]*)?new session/.test(p)){
+  $("#newSession").click();setExecutiveNow("Current action","New Session");
+  chairmanAcknowledge("A new executive session is open.",{resume:conversationActive});return true
+ }
+ if(/^(chairman[,\s]*)?(stop|be quiet|pause)/.test(p)){
+  window.__chairmanAbort=true;speechSynthesis?.cancel();endConversation();setPresence("ready","Paused");return true
+ }
+ if(/scroll down|move down/.test(p)){window.scrollBy({top:Math.round(innerHeight*.72),behavior:"smooth"});chairmanAcknowledge("Scrolling down.",{resume:conversationActive});return true}
+ if(/scroll up|move up/.test(p)){window.scrollBy({top:-Math.round(innerHeight*.72),behavior:"smooth"});chairmanAcknowledge("Scrolling up.",{resume:conversationActive});return true}
+ if(/go to top|scroll to top/.test(p)){window.scrollTo({top:0,behavior:"smooth"});chairmanAcknowledge("At the top.",{resume:conversationActive});return true}
+ if(/go to bottom|scroll to bottom/.test(p)){window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});chairmanAcknowledge("At the bottom.",{resume:conversationActive});return true}
  return false;
 }
 function buildRecognition(){
@@ -714,8 +754,39 @@ function startChairmanListening(){
  try{chairmanRecognition.start()}catch{}
 }
 function stopChairmanListening(){try{chairmanRecognition?.abort()}catch{}}
-function startConversation(){conversationActive=true;setConversationStatus("Listening","listening");startChairmanListening()}
+function startConversation(){speechSynthesis?.cancel();conversationActive=true;setConversationStatus("Listening","listening");startChairmanListening()}
 function endConversation(){conversationActive=false;shouldResumeListening=false;stopChairmanListening();setConversationStatus("Ready","ready")}
+
+
+let chairmanHasGreeted=false;
+function setPresence(state,text){
+ const orb=$("#presenceOrb"),status=$("#presenceStatus");
+ if(orb)orb.dataset.state=state;
+ if(status)status.textContent=text;
+}
+function setExecutiveNow(label,value){
+ const box=$("#executiveNow");if(!box)return;
+ box.innerHTML=`<span>${label}</span><strong>${value}</strong>`;
+}
+function founderGreeting(){
+ const hour=new Date().getHours();
+ const daypart=hour<12?"Good morning":hour<18?"Good afternoon":"Good evening";
+ return `${daypart}, Lewis. Chairman Runtime is online. The on-device model, Founder identity lock, enterprise memory, authoritative recall, voice control, and screen control are active. I am ready for your direction.`;
+}
+async function chairmanAcknowledge(text,{resume=false}={}){
+ setPresence("speaking","Chairman speaking");
+ await speakChairman(text,{resume});
+}
+async function performScreenAction(label,action){
+ setPresence("processing",`Opening ${label}`);
+ setExecutiveNow("Current action",`Opening ${label}`);
+ const ok=action();
+ if(ok)await chairmanAcknowledge(`${label} is open.`,{resume:conversationActive});
+ return ok;
+}
+function wakePhraseOnly(raw){
+ return /^(chairman|hello chairman|good morning chairman|good afternoon chairman|good evening chairman)[.! ]*$/i.test(String(raw).trim());
+}
 
 function authoritativeRoute(prompt){
  if(isIntroductionRequest(prompt))return authoritativeIntroduction();
@@ -1002,11 +1073,14 @@ ${prompt}`;
 }
 async function execute(){
  const box=$("#commandInput"),prompt=box.value.trim();if(!prompt)return;
+ setExecutiveNow("Founder command",prompt);
+ setPresence("processing","Chairman reasoning");
  box.value="";window.__chairmanAbort=false;const captured=captureFounderCommand(prompt);addMessage("user",prompt);
  const pending={id:uid(),role:"assistant",content:captured?`${captured}\n\nChairman is integrating this into the runtime…`:"Chairman is reasoning…",meta:{pending:true},at:now()};
  ensureSession().messages.push(pending);persist();renderMessages();
  $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");$("#stopButton").style.display="inline-flex";
  try{
+  clickTabByName("Command");
   const runtimeAnswer=authoritativeRoute(prompt);
   const out=runtimeAnswer
    ?runtimeAnswer
@@ -1018,7 +1092,10 @@ async function execute(){
  finally{$("#sendButton").disabled=false;$("#stopButton").classList.add("hidden");$("#stopButton").style.display="none"}
  compactSessionIfNeeded();persist();renderMessages();renderBrief();renderMemories();renderDecisions();renderTasks();updateAIState();
  const mb=$("#messages");if(mb)mb.scrollIntoView({behavior:"smooth",block:"end"});
- if(pending.content&&!pending.meta?.error)await speakChairman(pending.content,{resume:conversationActive});
+ if(pending.content&&!pending.meta?.error){
+   setExecutiveNow("Chairman response","Complete");
+   await speakChairman(pending.content,{resume:conversationActive});
+  }
  else if(conversationActive)setTimeout(startChairmanListening,400);
 }
 function renderMessages(scroll=true){
@@ -1259,7 +1336,7 @@ $("#showArchitecture").onclick=showArchitecture;$("#showWorkflows").onclick=show
 
 const manualRecognition=buildRecognition();
 if(manualRecognition){
- const oneShot=()=>{conversationActive=false;setConversationStatus("Listening once…","listening");try{manualRecognition.start()}catch{}};
+ const oneShot=()=>{speechSynthesis?.cancel();conversationActive=false;setConversationStatus("Listening once…","listening");try{manualRecognition.start()}catch{}};
  $("#micButton").onclick=oneShot;$("#dockSpeak").onclick=oneShot;
 }else{
  $("#micButton").disabled=true;$("#micButton").textContent="Voice unavailable";
@@ -1267,6 +1344,16 @@ if(manualRecognition){
 }
 $("#conversationMode").onclick=()=>conversationActive?endConversation():startConversation();
 $("#dockStop").onclick=()=>{window.__chairmanAbort=true;endConversation();speechSynthesis?.cancel()};
+
+setTimeout(async()=>{
+ if(state.initialized&&!chairmanHasGreeted){
+  chairmanHasGreeted=true;
+  setPresence("ready","Ready for the Founder");
+  setExecutiveNow("Current focus","Founder command");
+  await chairmanAcknowledge(founderGreeting(),{resume:false});
+ }
+},1200);
+
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)evaluateTasks()});
 if(!state.initialized)$("#setupOverlay").classList.remove("hidden");
 evaluateTasks();renderAll();updateAIState();
