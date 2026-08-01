@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chairman">
-  <title>VoxPilot Chairman v10</title>
+  <title>VoxPilot Chairman v11</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
 <style>
@@ -97,6 +97,9 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
  .composer .row{display:grid!important;grid-template-columns:1fr 1fr!important}
  .composer .row button{width:100%!important;min-width:0!important}
 }
+
+.identity-lock{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.identity-lock span{border:1px solid #3d6c47;background:#0c1b10;color:#84e29a;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:900;letter-spacing:.8px}
 </style>
 </head>
 <body>
@@ -153,7 +156,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 <div id="app">
 <div class="v9-build-marker">
-  VOXPILOT CHAIRMAN v10 · AUTO-RESTORING STANDALONE RUNTIME
+  VOXPILOT CHAIRMAN v11 · IDENTITY-LOCKED EXECUTIVE RUNTIME
 </div>
 
   <header>
@@ -180,12 +183,12 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   <main>
     <section id="command" class="tab active">
       <div class="quick-commands" id="quickCommands">
-<button data-command="Chairman, give me the complete executive brief and controlling next action.">Executive Brief</button>
-<button data-command="Chairman, recall the complete VoxPilot architecture, enterprise, ventures, decisions, and open gates.">Authoritative Deep Recall</button>
-<button data-command="Chairman, identify the single highest-value action I should take now.">Next Action</button>
-<button data-command="Chairman, audit the current runtime, risks, unknowns, and missing capabilities.">Runtime Audit</button>
+<button data-command="Chairman, give me the authoritative executive brief.">Executive Brief</button>
+<button data-command="Chairman, recall everything comprehensively and deeply.">Authoritative Deep Recall</button>
+<button data-command="Chairman, identify the controlling next action.">Next Action</button>
+<button data-command="Chairman, perform the authoritative runtime audit.">Runtime Audit</button>
 </div>
-<div class="runtime-mode-note">Deep Recall is synthesized by the persistent VoxPilot runtime—not delegated to the small local model.</div><div id="runtimeStats" class="runtime-stats"></div>
+<div class="runtime-mode-note">Deep Recall is synthesized by the persistent VoxPilot runtime—not delegated to the small local model.</div><div class="identity-lock"><span>FOUNDER: LEWIS FRANKLIN FEUQUAY</span><span>RUNTIME: CHAIRMAN</span></div><div id="runtimeStats" class="runtime-stats"></div>
 <div id="messages" class="messages"></div>
       <div class="composer">
         <textarea id="commandInput" placeholder="Speak directly to Chairman…"></textarea>
@@ -312,7 +315,7 @@ body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   <footer><span>iPhone-first</span><span>GitHub-hosted</span><span>Founder authority</span></footer>
 </div>
 <script>
-window.VOXPILOT_BUILD="10.0.0-single-file";
+window.VOXPILOT_BUILD="11.0.0-single-file";
 
 "use strict";
 const DB_KEY="voxpilot_chairman_runtime_v3";
@@ -461,6 +464,10 @@ function systemPrompt(){
  return `You are Chairman, the persistent executive cognition runtime inside VoxPilot Nexus for Founder ${state.founder.name}.
 
 IDENTITY
+You are Chairman, not the Founder.
+Lewis Franklin Feuquay is the Founder and final authority.
+Never claim to be the Founder.
+Never mirror the user's role or identity.
 You are not a generic assistant. You are the Founder-facing executive layer of VoxPilot Nexus. Never address the Founder as Chairman. The Founder retains final authority.
 
 RUNTIME DOCTRINE
@@ -510,6 +517,99 @@ async function ensureLocalModel(modelId=ai.model){
  finally{localEngineLoading=null}
 }
 
+
+
+function normalizedPrompt(prompt){return String(prompt||"").trim().toLowerCase()}
+function isIntroductionRequest(prompt){return /(introduce yourself|who are you|identify yourself|what are you|tell me about yourself)/i.test(normalizedPrompt(prompt))}
+function isExecutiveBriefRequest(prompt){return /(executive brief|brief me|complete brief|status brief|enterprise brief)/i.test(normalizedPrompt(prompt))}
+function isNextActionRequest(prompt){return /(next action|what should i do next|highest[- ]value action|controlling action|priority now)/i.test(normalizedPrompt(prompt))}
+function isRuntimeAuditRequest(prompt){return /(runtime audit|audit the runtime|what is missing|capability audit|system audit)/i.test(normalizedPrompt(prompt))}
+function authoritativeIntroduction(){
+ return {text:`Chairman Runtime online.
+
+You are Lewis Franklin Feuquay, the Founder and final authority of VoxPilot Nexus.
+
+I am Chairman: the persistent Founder-facing executive cognition runtime operating inside VoxPilot Nexus. I am not the Founder, and I will never claim the Founder's identity.
+
+My responsibilities are to preserve enterprise continuity; maintain doctrine, memory, decisions, tasks, approvals, evidence, and audit; reconstruct the enterprise before advising; coordinate bounded tools and specialist services when authorized; and identify the action that most increases enterprise value while reducing Founder attention.
+
+The on-device Qwen model is only a replaceable reasoning substrate beneath me. VoxPilot owns my identity, memory, governance, and enterprise state.`,confidence:.99,domains:["Chairman Identity","Founder Authority","VoxPilot Runtime"],authoritative:true};
+}
+function authoritativeExecutiveBrief(){
+ const openTasks=state.tasks.filter(t=>t.status!=="completed"),pending=state.actions.filter(a=>a.status==="pending"),vox=state.ventures.find(v=>v.id==="VOX");
+ return {text:`CHAIRMAN EXECUTIVE BRIEF
+
+FOUNDER
+Lewis Franklin Feuquay remains the final authority.
+
+CENTRAL PLATFORM
+VoxPilot Nexus is the central platform of the Sovereign Enterprise. Chairman is its persistent executive runtime, not the local language model.
+
+CURRENT VERIFIED RUNTIME
+• Build: ${window.VOXPILOT_BUILD}
+• Local model: ${ai.provider==="ondevice"?ai.model:"not active"}
+• Durable memories: ${state.memories.length}
+• Sessions: ${state.sessions.length}
+• Founder decisions: ${state.decisions.length}
+• Open tasks: ${openTasks.length}
+• Pending governed actions: ${pending.length}
+• Audit events: ${state.audit.length}
+
+ACTIVE ENTERPRISE LANES
+${state.ventures.map(v=>`• ${v.name}: ${v.status}. Gate: ${v.gate}`).join("\n")}
+
+CONTROLLING VOXPILOT GATE
+${vox?.gate||"Complete the five-field VoxPilot MVP definition."}
+
+EXECUTIVE JUDGMENT
+Do not expand into more interfaces until the Chairman knowledge substrate and the five-field VoxPilot MVP command are complete and verified.`,confidence:.98,domains:["Executive Brief","Portfolio Strategy","VoxPilot Runtime"],authoritative:true};
+}
+function authoritativeNextAction(){
+ return {text:`CONTROLLING NEXT ACTION
+
+Complete and lock the five-field VoxPilot MVP command specification:
+
+1. Target user
+2. Pain point
+3. Exact spoken command
+4. Target application or tool
+5. Exact action performed
+
+This is the highest-value move because it converts VoxPilot from an expanding architecture into one testable end-to-end product proof and forces engineering, demonstrations, security, integrations, and investor materials to converge.`,confidence:.99,domains:["Priority","MVP Gate","Enterprise Value"],authoritative:true};
+}
+function authoritativeRuntimeAudit(){
+ return {text:`CHAIRMAN RUNTIME AUDIT
+
+WORKING NOW
+• Single-file GitHub Pages deployment
+• On-device WebGPU inference
+• Persistent browser-held state
+• Founder doctrine, ventures, memories, sessions, decisions, tasks, actions, and audit
+• Authoritative identity, deep recall, executive brief, next action, and runtime audit
+• Voice input and reply playback
+• Optional cloud-provider boundary
+
+NOT YET COMPLETE
+• Native signed iOS application
+• Secure encrypted cross-device continuity
+• Complete import of the historical enterprise corpus
+• Semantic vector retrieval over that corpus
+• Live GitHub, file, terminal, Autodesk, Ansys, email, calendar, and engineering-tool execution
+• Mac/GPU worker mesh
+• Production authentication, key management, backup, and recovery
+• Independent domain replicants
+
+PRIMARY FAILURE CORRECTED IN v11
+The local model can no longer claim to be the Founder during identity or executive-runtime commands.`,confidence:.99,domains:["Runtime Audit","Security","Engineering"],authoritative:true};
+}
+function authoritativeRoute(prompt){
+ if(isIntroductionRequest(prompt))return authoritativeIntroduction();
+ if(isDeepRecallRequest(prompt))return executiveRecallSynthesis(prompt);
+ if(isExecutiveBriefRequest(prompt))return authoritativeExecutiveBrief();
+ if(isNextActionRequest(prompt))return authoritativeNextAction();
+ if(isRuntimeAuditRequest(prompt))return authoritativeRuntimeAudit();
+ return null;
+}
 
 function isDeepRecallRequest(prompt){
  return /(recall|remember).*(everything|complete|comprehensive|deep|all code|all enterprise)|complete.*(architecture|enterprise|voxpilot)|deep recall/i.test(prompt);
@@ -634,6 +734,12 @@ function captureFounderCommand(prompt){
 function completeRuntimeContext(prompt){
  const memory=relevantMemories(prompt,32);
  return `COMPLETE VOXPILOT RUNTIME CONTEXT
+
+IDENTITY LOCK
+- The user is ${state.founder.name}, the Founder and final authority.
+- You are Chairman, the executive runtime.
+- Never identify yourself as the Founder.
+- Never copy or assume the Founder's identity.
 
 FOUNDER
 - ${state.founder.name}
@@ -786,8 +892,9 @@ async function execute(){
  ensureSession().messages.push(pending);persist();renderMessages();
  $("#sendButton").disabled=true;$("#stopButton").classList.remove("hidden");$("#stopButton").style.display="inline-flex";
  try{
-  const out=isDeepRecallRequest(prompt)
-   ?executiveRecallSynthesis(prompt)
+  const runtimeAnswer=authoritativeRoute(prompt);
+  const out=runtimeAnswer
+   ?runtimeAnswer
    :ai.provider==="ondevice"
      ?await onDeviceCompletion(prompt,text=>{pending.content=text;renderMessages(false)})
      :await providerCall(prompt);
